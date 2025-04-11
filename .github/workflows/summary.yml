@@ -1,4 +1,5 @@
 name: Summary CI
+
 on:
   schedule:
     - cron: "0 0 * * *"
@@ -16,7 +17,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
           token: ${{ secrets.GH_PAT }}
 
       - name: Update summary in README
