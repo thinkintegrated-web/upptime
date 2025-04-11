@@ -1,6 +1,5 @@
-# Change these first
-owner: thinkintegrated-web # Your GitHub organization or username, where this repository lives
-repo: upptime # The name of this repository
+owner: thinkintegrated-web
+repo: upptime
 
 sites:
   - name: bhpcchamber.org
@@ -9,25 +8,16 @@ sites:
     url: https://www.blacktipit.com
   - name: ciaimaging.com
     url: https://www.ciaimaging.com
-  - name: confettiandcreativity.ccom
+  - name: confettiandcreativity.com
     url: https://www.confettiandccreativity.com
   - name: congdonyards.com
     url: https://www.congdonyards.com
 
 status-website:
-  # Add your custom domain name, or remove the `cname` line if you don't have a domain
-  # Uncomment the `baseUrl` line if you don't have a custom domain and add your repo name there
-  #cname: demo.upptime.js.org
   baseUrl: /upptime
   logoUrl: https://raw.githubusercontent.com/upptime/upptime.js.org/master/static/img/icon.svg
   name: Upptime
-  introTitle: "**Upptime** is the open-source uptime monitor and status page, powered entirely by GitHub."
-  introMessage: This is a sample status page which uses **real-time** data from our [GitHub repository](https://github.com/upptime/upptime). No server required — just GitHub Actions, Issues, and Pages. [**Get your own for free**](https://github.com/upptime/upptime)
-  #navbar:
-  #  - title: Status
-  #    href: /
-  #  - title: GitHub
-  #    href: https://github.com/$OWNER/$REPO
+  introTitle: "**Upptime** - Client Uptime Monitoring"
+  introMessage: Monitoring uptime and performance for our client websites.
 
-# Upptime also supports notifications, assigning issues, and more
-# See https://upptime.js.org/docs/configuration
+# Notifications and advanced config can go below if needed
