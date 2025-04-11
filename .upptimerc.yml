@@ -12,6 +12,36 @@ sites:
     url: https://www.confettiandcreativity.com
   - name: congdonyards.com
     url: https://www.congdonyards.com
+  - name: crittercontroldallas.com
+    url: https://www.crittercontroldallas.com
+  - name: cshpinnovation.com
+    url: https://www.cshpinnovation.com
+  - name: destinyfamilyoffice.com
+    url: https://www.destinyfamilyoffice.com
+  - name: eventsatcongdonyards.com
+    url: https://www.eventsatcongdonyards.com
+  - name: integralandcompany.com
+    url: https://www.integralandcompany.com
+  - name: invernessmedicalimaging.com
+    url: https://www.invernessmedicalimaging.com
+  - name: jobspartnership.org
+    url: https://www.jobspartnership.org
+  - name: matthiaspw.com
+    url: https://www.matthiaspw.com
+  - name: nicholswealth.com
+    url: https://www.nicholswealth.com
+  - name: orangeparkimaging.com
+    url: https://www.orangeparkimaging.com
+  - name: orlandoballet.org
+    url: https://www.orlandoballet.org
+  - name: srsradiology.com
+    url: https://www.srsradiology.com
+  - name: starterstudio.org
+    url: https://www.starterstudio.org
+  - name: cableelectrical.com
+    url: https://www.cableelectrical.com
+  - name: unlimitedwelding.com
+    url: https://www.unlimitedwelding.com
 
 status-website:
   baseUrl: /upptime
