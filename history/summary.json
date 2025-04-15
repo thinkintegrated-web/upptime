@@ -23,19 +23,17 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.blacktipit.com.ico",
     "slug": "blacktipit-com",
     "status": "up",
-    "uptime": "99.77%",
-    "uptimeDay": "99.13%",
-    "uptimeWeek": "99.77%",
-    "uptimeMonth": "99.77%",
-    "uptimeYear": "99.77%",
+    "uptime": "100.00%",
+    "uptimeDay": "100.00%",
+    "uptimeWeek": "100.00%",
+    "uptimeMonth": "100.00%",
+    "uptimeYear": "100.00%",
     "time": 991,
     "timeDay": 1496,
     "timeWeek": 991,
     "timeMonth": 991,
     "timeYear": 991,
-    "dailyMinutesDown": {
-      "2025-04-15": 12
-    }
+    "dailyMinutesDown": {}
   },
   {
     "name": "ciaimaging.com",
@@ -43,19 +41,17 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.ciaimaging.com.ico",
     "slug": "ciaimaging-com",
     "status": "up",
-    "uptime": "99.77%",
-    "uptimeDay": "99.17%",
-    "uptimeWeek": "99.77%",
-    "uptimeMonth": "99.77%",
-    "uptimeYear": "99.77%",
+    "uptime": "100.00%",
+    "uptimeDay": "100.00%",
+    "uptimeWeek": "100.00%",
+    "uptimeMonth": "100.00%",
+    "uptimeYear": "100.00%",
     "time": 918,
     "timeDay": 804,
     "timeWeek": 918,
     "timeMonth": 918,
     "timeYear": 918,
-    "dailyMinutesDown": {
-      "2025-04-15": 12
-    }
+    "dailyMinutesDown": {}
   },
   {
     "name": "confettiandcreativity.com",
@@ -63,11 +59,11 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.confettiandcreativity.com.ico",
     "slug": "confettiandcreativity-com",
     "status": "up",
-    "uptime": "99.33%",
+    "uptime": "99.36%",
     "uptimeDay": "100.00%",
-    "uptimeWeek": "99.33%",
-    "uptimeMonth": "99.33%",
-    "uptimeYear": "99.33%",
+    "uptimeWeek": "99.36%",
+    "uptimeMonth": "99.36%",
+    "uptimeYear": "99.36%",
     "time": 1330,
     "timeDay": 651,
     "timeWeek": 1330,
@@ -136,18 +132,20 @@
     "url": "https://www.destinyfamilyoffice.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.destinyfamilyoffice.com.ico",
     "slug": "destinyfamilyoffice-com",
-    "status": "up",
-    "uptime": "100.00%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
-    "uptimeMonth": "100.00%",
-    "uptimeYear": "100.00%",
+    "status": "down",
+    "uptime": "99.97%",
+    "uptimeDay": "99.90%",
+    "uptimeWeek": "99.97%",
+    "uptimeMonth": "99.97%",
+    "uptimeYear": "99.97%",
     "time": 8510,
     "timeDay": 7856,
     "timeWeek": 8510,
     "timeMonth": 8510,
     "timeYear": 8510,
-    "dailyMinutesDown": {}
+    "dailyMinutesDown": {
+      "2025-04-15": 1
+    }
   },
   {
     "name": "eventsatcongdonyards.com",
@@ -173,11 +171,11 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.integralandcompany.com.ico",
     "slug": "integralandcompany-com",
     "status": "up",
-    "uptime": "99.22%",
+    "uptime": "99.25%",
     "uptimeDay": "100.00%",
-    "uptimeWeek": "99.22%",
-    "uptimeMonth": "99.22%",
-    "uptimeYear": "99.22%",
+    "uptimeWeek": "99.25%",
+    "uptimeMonth": "99.25%",
+    "uptimeYear": "99.25%",
     "time": 3973,
     "timeDay": 3825,
     "timeWeek": 3973,
@@ -193,19 +191,17 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.invernessmedicalimaging.com.ico",
     "slug": "invernessmedicalimaging-com",
     "status": "up",
-    "uptime": "99.78%",
-    "uptimeDay": "99.20%",
-    "uptimeWeek": "99.78%",
-    "uptimeMonth": "99.78%",
-    "uptimeYear": "99.78%",
+    "uptime": "100.00%",
+    "uptimeDay": "100.00%",
+    "uptimeWeek": "100.00%",
+    "uptimeMonth": "100.00%",
+    "uptimeYear": "100.00%",
     "time": 1180,
     "timeDay": 1880,
     "timeWeek": 1180,
     "timeMonth": 1180,
     "timeYear": 1180,
-    "dailyMinutesDown": {
-      "2025-04-15": 12
-    }
+    "dailyMinutesDown": {}
   },
   {
     "name": "jobspartnership.org",
@@ -267,19 +263,17 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.orangeparkimaging.com.ico",
     "slug": "orangeparkimaging-com",
     "status": "up",
-    "uptime": "99.79%",
-    "uptimeDay": "99.23%",
-    "uptimeWeek": "99.79%",
-    "uptimeMonth": "99.79%",
-    "uptimeYear": "99.79%",
+    "uptime": "100.00%",
+    "uptimeDay": "100.00%",
+    "uptimeWeek": "100.00%",
+    "uptimeMonth": "100.00%",
+    "uptimeYear": "100.00%",
     "time": 933,
     "timeDay": 712,
     "timeWeek": 933,
     "timeMonth": 933,
     "timeYear": 933,
-    "dailyMinutesDown": {
-      "2025-04-15": 11
-    }
+    "dailyMinutesDown": {}
   },
   {
     "name": "orlandoballet.org",
@@ -305,19 +299,17 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.srsradiology.com.ico",
     "slug": "srsradiology-com",
     "status": "up",
-    "uptime": "99.80%",
-    "uptimeDay": "99.26%",
-    "uptimeWeek": "99.80%",
-    "uptimeMonth": "99.80%",
-    "uptimeYear": "99.80%",
+    "uptime": "100.00%",
+    "uptimeDay": "100.00%",
+    "uptimeWeek": "100.00%",
+    "uptimeMonth": "100.00%",
+    "uptimeYear": "100.00%",
     "time": 898,
     "timeDay": 743,
     "timeWeek": 898,
     "timeMonth": 898,
     "timeYear": 898,
-    "dailyMinutesDown": {
-      "2025-04-15": 11
-    }
+    "dailyMinutesDown": {}
   },
   {
     "name": "starterstudio.org",
