@@ -34,6 +34,8 @@ sites:
     url: https://www.orangeparkimaging.com
   - name: orlandoballet.org
     url: https://www.orlandoballet.org
+  - name: semiconductorengine.org
+    url: https://www.semiconductorengine.org
   - name: srsradiology.com
     url: https://www.srsradiology.com
   - name: starterstudio.org
