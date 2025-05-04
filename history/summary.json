@@ -138,9 +138,9 @@
     "url": "https://www.destinyfamilyoffice.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.destinyfamilyoffice.com.ico",
     "slug": "destinyfamilyoffice-com",
-    "status": "up",
+    "status": "down",
     "uptime": "99.58%",
-    "uptimeDay": "100.00%",
+    "uptimeDay": "99.97%",
     "uptimeWeek": "99.66%",
     "uptimeMonth": "99.58%",
     "uptimeYear": "99.58%",
@@ -150,6 +150,7 @@
     "timeMonth": 8069,
     "timeYear": 8069,
     "dailyMinutesDown": {
+      "2025-05-04": 0,
       "2025-05-03": 34,
       "2025-04-25": 53,
       "2025-04-15": 52
