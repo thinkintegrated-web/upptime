@@ -23,11 +23,11 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.blacktipit.com.ico",
     "slug": "blacktipit-com",
     "status": "up",
-    "uptime": "99.84%",
+    "uptime": "99.85%",
     "uptimeDay": "100.00%",
     "uptimeWeek": "99.64%",
     "uptimeMonth": "99.82%",
-    "uptimeYear": "99.84%",
+    "uptimeYear": "99.85%",
     "time": 860,
     "timeDay": 216,
     "timeWeek": 587,
@@ -84,10 +84,10 @@
     "url": "https://www.congdonyards.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.congdonyards.com.ico",
     "slug": "congdonyards-com",
-    "status": "up",
+    "status": "down",
     "uptime": "99.94%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
+    "uptimeDay": "99.95%",
+    "uptimeWeek": "99.99%",
     "uptimeMonth": "99.93%",
     "uptimeYear": "99.94%",
     "time": 1493,
@@ -96,6 +96,7 @@
     "timeMonth": 1445,
     "timeYear": 1493,
     "dailyMinutesDown": {
+      "2025-05-16": 1,
       "2025-04-21": 32
     }
   },
@@ -122,10 +123,10 @@
     "url": "https://www.cshpinnovation.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.cshpinnovation.com.ico",
     "slug": "cshpinnovation-com",
-    "status": "up",
+    "status": "down",
     "uptime": "100.00%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
+    "uptimeDay": "99.96%",
+    "uptimeWeek": "99.99%",
     "uptimeMonth": "100.00%",
     "uptimeYear": "100.00%",
     "time": 1911,
@@ -133,7 +134,9 @@
     "timeWeek": 1796,
     "timeMonth": 1852,
     "timeYear": 1911,
-    "dailyMinutesDown": {}
+    "dailyMinutesDown": {
+      "2025-05-16": 1
+    }
   },
   {
     "name": "destinyfamilyoffice.com",
@@ -192,7 +195,7 @@
     "time": 3876,
     "timeDay": 4768,
     "timeWeek": 4004,
-    "timeMonth": 3859,
+    "timeMonth": 3830,
     "timeYear": 3876,
     "dailyMinutesDown": {
       "2025-05-07": 51,
@@ -363,11 +366,11 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.starterstudio.org.ico",
     "slug": "starterstudio-org",
     "status": "up",
-    "uptime": "99.83%",
+    "uptime": "99.84%",
     "uptimeDay": "100.00%",
     "uptimeWeek": "100.00%",
     "uptimeMonth": "99.81%",
-    "uptimeYear": "99.83%",
+    "uptimeYear": "99.84%",
     "time": 1329,
     "timeDay": 1461,
     "timeWeek": 1346,
