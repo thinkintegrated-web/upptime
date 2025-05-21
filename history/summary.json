@@ -386,19 +386,19 @@
     "url": "https://www.cableelectrical.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.cableelectrical.com.ico",
     "slug": "cableelectrical-com",
-    "status": "down",
-    "uptime": "100.00%",
-    "uptimeDay": "99.99%",
-    "uptimeWeek": "100.00%",
-    "uptimeMonth": "100.00%",
-    "uptimeYear": "100.00%",
-    "time": 1554,
-    "timeDay": 568,
-    "timeWeek": 1255,
-    "timeMonth": 1658,
-    "timeYear": 1554,
+    "status": "up",
+    "uptime": "99.92%",
+    "uptimeDay": "96.68%",
+    "uptimeWeek": "99.53%",
+    "uptimeMonth": "99.89%",
+    "uptimeYear": "99.92%",
+    "time": 1536,
+    "timeDay": 642,
+    "timeWeek": 1203,
+    "timeMonth": 1631,
+    "timeYear": 1536,
     "dailyMinutesDown": {
-      "2025-05-21": 0
+      "2025-05-21": 48
     }
   },
   {
