@@ -232,19 +232,19 @@
     "url": "https://www.jobspartnership.org",
     "icon": "https://icons.duckduckgo.com/ip3/www.jobspartnership.org.ico",
     "slug": "jobspartnership-org",
-    "status": "down",
-    "uptime": "100.00%",
-    "uptimeDay": "99.98%",
-    "uptimeWeek": "100.00%",
-    "uptimeMonth": "100.00%",
-    "uptimeYear": "100.00%",
-    "time": 1378,
-    "timeDay": 1067,
-    "timeWeek": 1475,
-    "timeMonth": 1435,
-    "timeYear": 1378,
+    "status": "up",
+    "uptime": "99.98%",
+    "uptimeDay": "99.12%",
+    "uptimeWeek": "99.87%",
+    "uptimeMonth": "99.97%",
+    "uptimeYear": "99.98%",
+    "time": 1388,
+    "timeDay": 1326,
+    "timeWeek": 1516,
+    "timeMonth": 1448,
+    "timeYear": 1388,
     "dailyMinutesDown": {
-      "2025-05-25": 0
+      "2025-05-25": 13
     }
   },
   {
