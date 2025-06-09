@@ -234,18 +234,20 @@
     "url": "https://www.jobspartnership.org",
     "icon": "https://icons.duckduckgo.com/ip3/www.jobspartnership.org.ico",
     "slug": "jobspartnership-org",
-    "status": "up",
+    "status": "down",
     "uptime": "100.00%",
-    "uptimeDay": "100.00%",
+    "uptimeDay": "99.98%",
     "uptimeWeek": "100.00%",
     "uptimeMonth": "100.00%",
     "uptimeYear": "100.00%",
-    "time": 1408,
-    "timeDay": 1532,
-    "timeWeek": 1418,
-    "timeMonth": 1479,
-    "timeYear": 1408,
-    "dailyMinutesDown": {}
+    "time": 1395,
+    "timeDay": 1043,
+    "timeWeek": 1310,
+    "timeMonth": 1452,
+    "timeYear": 1395,
+    "dailyMinutesDown": {
+      "2025-06-09": 0
+    }
   },
   {
     "name": "matthiaspw.com",
