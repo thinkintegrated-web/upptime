@@ -1,7 +1,7 @@
 url: https://www.invernessmedicalimaging.com
-status: up
-code: 200
-responseTime: 928
-lastUpdated: 2025-08-02T23:13:55.769Z
+status: down
+code: 415
+responseTime: 1132
+lastUpdated: 2025-08-03T22:27:01.607Z
 startTime: 2025-04-11T19:31:07.824Z
 generator: Upptime <https://github.com/upptime/upptime>
