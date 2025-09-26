@@ -34,7 +34,7 @@
     "uptimeYear": "99.82%",
     "time": 765,
     "timeDay": 259,
-    "timeWeek": 773,
+    "timeWeek": 951,
     "timeMonth": 814,
     "timeYear": 765,
     "dailyMinutesDown": {
@@ -96,7 +96,7 @@
     "uptimeYear": "99.76%",
     "time": 5945,
     "timeDay": 10080,
-    "timeWeek": 8958,
+    "timeWeek": 8924,
     "timeMonth": 8392,
     "timeYear": 5945,
     "dailyMinutesDown": {
@@ -146,18 +146,20 @@
     "url": "https://www.crittercontroldallas.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.crittercontroldallas.com.ico",
     "slug": "crittercontroldallas-com",
-    "status": "up",
+    "status": "down",
     "uptime": "100.00%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
+    "uptimeDay": "99.96%",
+    "uptimeWeek": "99.99%",
     "uptimeMonth": "100.00%",
     "uptimeYear": "100.00%",
     "time": 242,
-    "timeDay": 154,
-    "timeWeek": 234,
-    "timeMonth": 239,
+    "timeDay": 162,
+    "timeWeek": 226,
+    "timeMonth": 237,
     "timeYear": 242,
-    "dailyMinutesDown": {}
+    "dailyMinutesDown": {
+      "2025-09-26": 1
+    }
   },
   {
     "name": "cshpinnovation.com",
