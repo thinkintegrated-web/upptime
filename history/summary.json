@@ -150,19 +150,19 @@
     "url": "https://www.crittercontroldallas.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.crittercontroldallas.com.ico",
     "slug": "crittercontroldallas-com",
-    "status": "down",
+    "status": "up",
     "uptime": "100.00%",
-    "uptimeDay": "99.96%",
-    "uptimeWeek": "99.99%",
-    "uptimeMonth": "100.00%",
+    "uptimeDay": "99.15%",
+    "uptimeWeek": "99.88%",
+    "uptimeMonth": "99.97%",
     "uptimeYear": "100.00%",
     "time": 242,
-    "timeDay": 236,
-    "timeWeek": 228,
+    "timeDay": 240,
+    "timeWeek": 230,
     "timeMonth": 243,
     "timeYear": 242,
     "dailyMinutesDown": {
-      "2025-09-29": 1
+      "2025-09-29": 12
     }
   },
   {
