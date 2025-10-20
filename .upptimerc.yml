@@ -46,6 +46,8 @@ sites:
     url: https://www.cableelectrical.com
   - name: unlimitedwelding.com
     url: https://www.unlimitedwelding.com
+  - name: danny.thinkintegrated.biz
+    url: http://danny.thinkintegrated.biz
 
 status-website:
   baseUrl: /upptime
