@@ -48,8 +48,22 @@ sites:
 status-website:
   baseUrl: /upptime
   logoUrl: https://raw.githubusercontent.com/upptime/upptime.js.org/master/static/img/icon.svg
-  name: Upptime
+  name: Think Integrated Upptime
   introTitle: "**Upptime** - Client Uptime Monitoring"
   introMessage: Monitoring uptime and performance for our client websites.
+  customHeadHtml: |
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #0f172a;
+        color: #f8fafc;
+      }
+      a {
+        color: #22d3ee;
+      }
+      .status {
+        border-radius: 6px;
+      }
+    </style>
 
 # Notifications and advanced config can go below if needed
