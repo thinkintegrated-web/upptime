@@ -3,143 +3,191 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Status</title>
+  <title>Status Dashboard</title>
   <style>
-    /* Put it where you want; these are just nice defaults */
-    .sites-header { display:grid; grid-template-columns:1.6fr .6fr .6fr .8fr; gap:.75rem;
-      padding:.75rem 1rem; font-weight:600; background:#f6f7f9; border:1px solid #e3e6ea;
-      border-radius:.5rem; margin:1rem 0 .75rem }
-    .sites { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:.75rem }
-    .site-card { display:grid; grid-template-columns:1.6fr .6fr .6fr .8fr; gap:.75rem; align-items:center;
-      padding:1rem; border:1px solid #e3e6ea; border-radius:.75rem; background:#fff }
-    .site-card .url { display:flex; align-items:center; gap:.5rem }
-    .pill { padding:.2rem .5rem; border-radius:999px; font-size:.875rem }
-    .pill.up { background:#e8f7ee; color:#207d41 }
-    .pill.down { background:#fde8e8; color:#b42318 }
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 2rem;
+      background: #fafafa;
+      color: #222;
+    }
+    .sites-header {
+      display: grid;
+      grid-template-columns: 1.6fr .6fr .6fr .8fr;
+      gap: .75rem;
+      padding: .75rem 1rem;
+      font-weight: 600;
+      background: #f6f7f9;
+      border: 1px solid #e3e6ea;
+      border-radius: .5rem;
+      margin: 1rem 0 .75rem;
+    }
+    .sites {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: .75rem;
+    }
+    .site-card {
+      display: grid;
+      grid-template-columns: 1.6fr .6fr .6fr .8fr;
+      gap: .75rem;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid #e3e6ea;
+      border-radius: .75rem;
+      background: #fff;
+      transition: box-shadow .2s ease;
+    }
+    .site-card:hover {
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .site-card .url {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .pill {
+      padding: .2rem .5rem;
+      border-radius: 999px;
+      font-size: .875rem;
+    }
+    .pill.up { background: #e8f7ee; color: #207d41; }
+    .pill.down { background: #fde8e8; color: #b42318; }
+
+    pre#debug {
+      background: #111;
+      color: #9fe;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: pre-wrap;
+      margin-top: 16px;
+      overflow-x: auto;
+    }
   </style>
 </head>
 <body>
 
-  <!-- YOU choose where this header lives -->
   <header class="sites-header">
     <div>URL</div><div>Status</div><div>Response</div><div>Uptime</div>
   </header>
 
-  <!-- YOU choose where the cards list appears -->
   <section id="sites" class="sites"></section>
 
-  <!-- Optional: put additional sections anywhere and populate them by ID -->
-  <section id="fastest" style="margin-top:1.5rem;"></section>
-
-  <template id="site-card-tpl">
-    <article class="site-card">
-      <div class="url"><img data-favicon height="13" alt="" /><a data-link></a></div>
-      <div class="status"><span class="pill" data-status></span></div>
-      <div class="response" data-response></div>
-      <div class="uptime" data-uptime></div>
-    </article>
-  </template>
-
   <script>
-const apiBase = "/uptime/api";  // correct for your repo path
+    const apiBase = "/uptime/api"; // your repo path
 
-// simple on-page debug
-const debug = (msg) => {
-  let box = document.getElementById('debug');
-  if (!box) {
-    box = document.createElement('pre');
-    box.id = 'debug';
-    box.style.cssText = 'background:#111;color:#9fe;padding:8px;border-radius:6px;font-size:12px;white-space:pre-wrap;margin-top:16px;';
-    document.body.appendChild(box);
-  }
-  box.textContent += (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)) + '\n';
-};
+    const debug = (msg) => {
+      let box = document.getElementById('debug');
+      if (!box) {
+        box = document.createElement('pre');
+        box.id = 'debug';
+        document.body.appendChild(box);
+      }
+      box.textContent += (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)) + '\n';
+    };
 
-async function fetchJson(url) {
-  try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-    return await res.json();
-  } catch (e) {
-    debug(`Fetch failed: ${url} → ${e.message}`);
-    return null;
-  }
-}
+    async function fetchJson(url) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        return await res.json();
+      } catch (e) {
+        debug(`Fetch failed: ${url} → ${e.message}`);
+        return null;
+      }
+    }
 
-function statusPill(upNow) {
-  const s = document.createElement('span');
-  s.className = 'pill ' + (upNow ? 'up' : 'down');
-  s.textContent = upNow ? 'Up' : 'Down';
-  return s;
-}
+    function statusPill(upNow) {
+      const s = document.createElement('span');
+      s.className = 'pill ' + (upNow ? 'up' : 'down');
+      s.textContent = upNow ? 'Up' : 'Down';
+      return s;
+    }
 
-function renderCard(container, site, data) {
-  const el = document.createElement('article');
-  el.className = 'site-card';
+    function renderCard(container, site, data) {
+      const el = document.createElement('article');
+      el.className = 'site-card';
 
-  const url = document.createElement('div');
-  url.className = 'url';
-  const fav = document.createElement('img'); fav.height = 13; fav.alt = '';
-  try { fav.src = 'https://icons.duckduckgo.com/ip3/' + new URL(site.url).host + '.ico'; } catch {}
-  const a = document.createElement('a'); a.href = site.url; a.textContent = site.name || site.url;
-  url.append(fav, a);
+      const url = document.createElement('div');
+      url.className = 'url';
+      const fav = document.createElement('img');
+      fav.height = 13;
+      fav.alt = '';
+      try { fav.src = 'https://icons.duckduckgo.com/ip3/' + new URL(site.url).host + '.ico'; } catch {}
+      const a = document.createElement('a');
+      a.href = site.url;
+      a.textContent = site.name || site.url;
+      url.append(fav, a);
 
-  const status = document.createElement('div'); status.className = 'status';
-  const upNow = (data.status?.status || '').toLowerCase() === 'up' || data.summary?.status === 'up';
-  status.appendChild(statusPill(upNow));
+      const status = document.createElement('div');
+      status.className = 'status';
+      const upNow = (data.status?.status || '').toLowerCase() === 'up' || data.summary?.status === 'up';
+      status.appendChild(statusPill(upNow));
 
-  const response = document.createElement('div'); response.className = 'response';
-  const ms = data.responseMs ?? data.resp?.last24h ?? data.resp?.average ?? data.resp?.daily?.slice(-1)?.[0]?.value;
-  response.textContent = (ms != null && isFinite(ms)) ? Math.round(ms) + ' ms' : '—';
+      const response = document.createElement('div');
+      response.className = 'response';
+      const ms = data.responseMs ?? data.resp?.last24h ?? data.resp?.average ?? data.resp?.daily?.slice(-1)?.[0]?.value;
+      response.textContent = (ms != null && isFinite(ms)) ? Math.round(ms) + ' ms' : '—';
 
-  const uptime = document.createElement('div'); uptime.className = 'uptime';
-  const pct = data.up?.overall ?? data.summary?.uptime ?? data.up?.weekly?.slice(-1)?.[0]?.uptime;
-  uptime.textContent = (pct != null && isFinite(pct)) ? Number(pct).toFixed(2) + '%' : '—';
+      const uptime = document.createElement('div');
+      uptime.className = 'uptime';
+      const pct = data.up?.overall ?? data.summary?.uptime ?? data.up?.weekly?.slice(-1)?.[0]?.uptime;
+      uptime.textContent = (pct != null && isFinite(pct)) ? Number(pct).toFixed(2) + '%' : '—';
 
-  el.append(url, status, response, uptime);
-  container.appendChild(el);
-}
+      el.append(url, status, response, uptime);
+      container.appendChild(el);
+    }
 
-async function getSiteMetrics(slug) {
-  const [status, resp, up] = await Promise.all([
-    fetchJson(`${apiBase}/${slug}/status.json`).then(j => j || fetchJson(`${apiBase}/${slug}/summary.json`)),
-    fetchJson(`${apiBase}/${slug}/response-time.json`),
-    fetchJson(`${apiBase}/${slug}/uptime.json`)
-  ]);
-  return { status, resp, up };
-}
+    async function getSiteMetrics(slug) {
+      const [status, resp, up] = await Promise.all([
+        fetchJson(`${apiBase}/${slug}/status.json`).then(j => j || fetchJson(`${apiBase}/${slug}/summary.json`)),
+        fetchJson(`${apiBase}/${slug}/response-time.json`),
+        fetchJson(`${apiBase}/${slug}/uptime.json`)
+      ]);
+      return { status, resp, up };
+    }
 
-(async function init() {
-  debug(`apiBase resolved to: ${apiBase}`);
+    (async function init() {
+      debug(`apiBase resolved to: ${apiBase}`);
 
-  // 🔁 NEW: try /api/summary.json, then fall back to /history/summary.json
-  let summary = await fetchJson(`${apiBase}/summary.json`);
-  if (!summary) {
-    const basePath = location.pathname.replace(/\/[^/]*$/, '/'); // "/uptime/"
-    summary = await fetchJson(`${basePath}history/summary.json`);
-  }
-  if (!summary) {
-    debug('No summary found at /api/summary.json or /history/summary.json.');
-    return;
-  }
+      // Try /api/summary.json, then /history/summary.json
+      let summary = await fetchJson(`${apiBase}/summary.json`);
+      if (!summary) {
+        const basePath = location.pathname.replace(/\/[^/]*$/, '/'); // "/uptime/"
+        summary = await fetchJson(`${basePath}history/summary.json`);
+      }
+      if (!summary) {
+        debug('No summary found at /api/summary.json or /history/summary.json.');
+        return;
+      }
 
-  const list = document.getElementById('sites');
-  if (!list) { debug('Missing #sites container'); return; }
+      const list = document.getElementById('sites');
+      if (!list) { debug('Missing #sites container'); return; }
 
-  // Upptime summary (history/summary.json) is usually an array of site objects
-  const sites = Array.isArray(summary)
-    ? summary.map(s => ({ slug: s.slug, url: s.url || s.site || '', name: s.name || s.title || s.slug, _summary: s }))
-    : (summary.sites || []).map(s => ({ slug: s.slug, url: s.url, name: s.name || s.slug, _summary: s }));
+      const sites = Array.isArray(summary)
+        ? summary.map(s => ({
+            slug: s.slug,
+            url: s.url || s.site || '',
+            name: s.name || s.title || s.slug,
+            _summary: s
+          }))
+        : (summary.sites || []).map(s => ({
+            slug: s.slug,
+            url: s.url,
+            name: s.name || s.slug,
+            _summary: s
+          }));
 
-  for (const site of sites) {
-    const metrics = await getSiteMetrics(site.slug);
-    metrics.summary = { status: site._summary?.status, uptime: site._summary?.uptime };
-    if (typeof site._summary?.responseTime === 'number') metrics.responseMs = site._summary.responseTime;
-    renderCard(list, site, metrics);
-  }
-})();
-</script>
-
+      for (const site of sites) {
+        const metrics = await getSiteMetrics(site.slug);
+        metrics.summary = { status: site._summary?.status, uptime: site._summary?.uptime };
+        if (typeof site._summary?.responseTime === 'number')
+          metrics.responseMs = site._summary.responseTime;
+        renderCard(list, site, metrics);
+      }
+    })();
+  </script>
 
 </body>
 </html>
