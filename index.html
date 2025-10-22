@@ -12,13 +12,12 @@
       border-radius:.5rem; margin:1rem 0 .75rem; }
     .sites { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:.75rem; }
     .site-card { display:grid; grid-template-columns:1.6fr .6fr .6fr .8fr; gap:.75rem; align-items:center;
-      padding:1rem; border:1px solid var(--br); border-radius:.75rem; background:var(--card); transition: box-shadow .2s; }
-    .site-card:hover { box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+      padding:1rem; border:1px solid var(--br); border-radius:.75rem; background:var(--card); }
     .site-card .url { display:flex; align-items:center; gap:.5rem; }
     .pill { padding:.2rem .5rem; border-radius:999px; font-size:.875rem; }
     .pill.up { background:#e8f7ee; color:#207d41; }
     .pill.down { background:#fde8e8; color:#b42318; }
-    pre#debug { background:#111;color:#9fe;padding:8px;border-radius:6px;font-size:12px;white-space:pre-wrap;margin-top:16px;overflow:auto; display:none; }
+    .empty { margin-top:1rem; padding:1rem; background:#fff8db; border:1px solid #ffe08a; border-radius:.5rem; }
   </style>
 </head>
 <body>
@@ -28,40 +27,21 @@
   </header>
 
   <section id="sites" class="sites"></section>
+  <div id="empty" class="empty" style="display:none">
+    No public summary found yet. Once GitHub Pages publishes <code>history/summary.json</code>, this dashboard will populate automatically.
+  </div>
 
   <script>
-    // === repo config ===
-    const OWNER = "thinkintegrated-web";
-    const REPO  = "uptime";
-    const BRANCH_API = "master";   // where /api/<slug>/ lives
-    const BRANCH_SUMMARY = "gh-pages"; // where history/summary.json lives
+    // Resolve summary.json RELATIVE to wherever this page is served (handles /, /uptime/, etc.)
+    const summaryUrl = new URL('history/summary.json', location.href).href;
 
-    // Pages location
-    const PAGES_BASE = "/uptime/";
-    const SUMMARY_PAGES = location.origin + PAGES_BASE + "history/summary.json";
-
-    // Raw locations
-    const RAW_BASE_API = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH_API}/`;
-    const RAW_BASE_SUMMARY = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH_SUMMARY}/`;
-    const SUMMARY_RAW_GHPAGES = RAW_BASE_SUMMARY + "history/summary.json";
-    const apiRaw = (slug, file) => RAW_BASE_API + `api/${slug}/${file}`;
-
-    // GitHub Contents API (public; 60 req/hr without token)
-    const GH_CONTENTS_API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/api`;
-
-    function debug(msg) {
-      let box = document.getElementById('debug');
-      if (!box) { box = document.createElement('pre'); box.id = 'debug'; document.body.appendChild(box); }
-      box.style.display = 'block';
-      box.textContent += (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)) + '\n';
-    }
-
-    async function fetchJson(url) {
+    // Quiet fetch: returns null on failure (no 404 noise)
+    async function fetchJsonQuiet(url) {
       try {
         const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        if (!res.ok) return null;
         return await res.json();
-      } catch (e) { debug(`Fetch failed: ${url} → ${e.message}`); return null; }
+      } catch { return null; }
     }
 
     function pill(isUp) {
@@ -71,138 +51,51 @@
       return s;
     }
 
-    function renderCard(container, site, metrics) {
+    function renderCard(container, row) {
       const el = document.createElement('article');
       el.className = 'site-card';
 
       const url = document.createElement('div');
       url.className = 'url';
       const fav = document.createElement('img'); fav.height = 13; fav.alt = '';
-      try { fav.src = 'https://icons.duckduckgo.com/ip3/' + new URL(site.url).host + '.ico'; } catch {}
-      const a = document.createElement('a'); a.href = site.url; a.textContent = site.name || site.url || site.slug;
-      url.append(fav, a);
+      const link = document.createElement('a');
+      const href = row.url || row.site || '';
+      if (href) {
+        try { fav.src = 'https://icons.duckduckgo.com/ip3/' + new URL(href).host + '.ico'; } catch {}
+        link.href = href;
+      }
+      link.textContent = row.name || row.title || row.slug || href || '—';
+      url.append(fav, link);
 
       const status = document.createElement('div'); status.className = 'status';
-      if (site.status === 'up' || site.status === 'down') {
-        status.appendChild(pill(site.status === 'up'));
-      } else {
-        status.textContent = '—';
-      }
+      const s = String(row.status || '').toLowerCase();
+      if (s === 'up' || s === 'down') status.appendChild(pill(s === 'up')); else status.textContent = '—';
 
       const response = document.createElement('div'); response.className = 'response';
-      const ms = (typeof metrics.responseMs === 'number') ? Math.round(metrics.responseMs) : null;
-      response.textContent = (ms != null && isFinite(ms)) ? `${ms} ms` : '—';
+      const r = typeof row.responseTime === 'number' ? Math.round(row.responseTime) : null;
+      response.textContent = (r != null && isFinite(r)) ? `${r} ms` : '—';
 
       const uptime = document.createElement('div'); uptime.className = 'uptime';
-      const pct = (typeof metrics.uptimePct === 'number') ? metrics.uptimePct : null;
-      uptime.textContent = (pct != null && isFinite(pct)) ? `${pct.toFixed(2)}%` : '—';
+      const u = typeof row.uptime === 'number' ? row.uptime : null;
+      uptime.textContent = (u != null && isFinite(u)) ? `${u.toFixed(2)}%` : '—';
 
       el.append(url, status, response, uptime);
       container.appendChild(el);
     }
 
-    // helpers for JSON shapes
-    const last = (arr) => (Array.isArray(arr) && arr.length ? arr[arr.length - 1] : null);
-    function extractResponseMs(obj) {
-      if (obj == null) return null;
-      if (typeof obj === 'number') return obj;
-      if (typeof obj.average === 'number') return obj.average;
-      if (typeof obj.median === 'number') return obj.median;
-      if (typeof obj.last24h === 'number') return obj.last24h;
-      if (obj.daily)   { const d = last(obj.daily);   if (d && typeof d.value === 'number') return d.value; }
-      if (obj.weekly)  { const d = last(obj.weekly);  if (d && typeof d.value === 'number') return d.value; }
-      if (obj.monthly) { const d = last(obj.monthly); if (d && typeof d.value === 'number') return d.value; }
-      if (Array.isArray(obj) && typeof last(obj)?.value === 'number') return last(obj).value;
-      return null;
-    }
-    function extractUptimePct(obj) {
-      if (obj == null) return null;
-      if (typeof obj === 'number') return obj;
-      if (typeof obj.uptime === 'number') return obj.uptime;
-      if (typeof obj.overall === 'number') return obj.overall;
-      if (obj.daily)   { const d = last(obj.daily);   if (d && typeof d.uptime === 'number') return d.uptime; }
-      if (obj.weekly)  { const d = last(obj.weekly);  if (d && typeof d.uptime === 'number') return d.uptime; }
-      if (obj.monthly) { const d = last(obj.monthly); if (d && typeof d.uptime === 'number') return d.uptime; }
-      if (Array.isArray(obj) && typeof last(obj)?.uptime === 'number') return last(obj).uptime;
-      return null;
-    }
+    (async function init() {
+      const list = document.getElementById('sites');
+      const empty = document.getElementById('empty');
 
-    async function loadPerSite(slug) {
-      const respFiles = ["response-time.json","response-time-day.json","response-time-week.json","response-time-month.json","response-time-year.json"];
-      const upFiles   = ["uptime.json","uptime-day.json","uptime-week.json","uptime-month.json","uptime-year.json"];
-
-      let responseMs = null, uptimePct = null;
-
-      for (const f of respFiles) {
-        const j = await fetchJson(apiRaw(slug, f));
-        const v = extractResponseMs(j);
-        if (typeof v === 'number') { responseMs = v; break; }
-      }
-      for (const f of upFiles) {
-        const j = await fetchJson(apiRaw(slug, f));
-        const v = extractUptimePct(j);
-        if (typeof v === 'number') { uptimePct = v; break; }
-      }
-      return { responseMs, uptimePct };
-    }
-
-    // discovery strategies
-    async function discoverFromSummary() {
-      // 1) Pages
-      let summary = await fetchJson(SUMMARY_PAGES);
-      if (!summary) {
-        // 2) Raw on gh-pages
-        summary = await fetchJson(SUMMARY_RAW_GHPAGES);
-      }
-      if (!summary) return null;
+      // Only one fetch to a known public path; no raw/github-api calls = no 404 spam
+      const summary = await fetchJsonQuiet(summaryUrl);
+      if (!summary) { empty.style.display = 'block'; return; }
 
       const rows = Array.isArray(summary) ? summary : (summary.sites || []);
-      return rows.map(s => ({
-        slug: s.slug,
-        name: s.name || s.title || s.slug,
-        url:  s.url  || s.site  || '',
-        status: (s.status || '').toLowerCase()
-      }));
-    }
+      if (!rows.length) { empty.style.display = 'block'; return; }
 
-    async function discoverFromContentsAPI() {
-      // Enumerate /api directories as slugs
-      const list = await fetchJson(GH_CONTENTS_API);
-      if (!Array.isArray(list)) return null;
-      const dirs = list.filter(x => x.type === "dir");
-      return dirs.map(d => ({
-        slug: d.name,
-        name: d.name.replace(/-/g, "."),
-        url:  "https://" + d.name.replace(/-/g, "."),
-        status: null // unknown without summary
-      }));
-    }
-
-    (async function init() {
-      const container = document.getElementById('sites');
-
-      // Try summary-based discovery first (best: includes live status)
-      let sites = await discoverFromSummary();
-
-      // Fallback: list /api folders via GitHub API (gives us slugs at least)
-      if (!sites) {
-        debug("Summary not available; using GitHub Contents API to list /api slugs (status will be —).");
-        sites = await discoverFromContentsAPI();
-      }
-
-      if (!sites || !sites.length) {
-        debug("No sites discovered via summary or contents API.");
-        return;
-      }
-
-      // Render each site and load metrics from /api on master (raw)
-      for (const site of sites) {
-        const metrics = await loadPerSite(site.slug);
-        renderCard(container, site, metrics);
-      }
+      rows.forEach(renderCard.bind(null, list));
     })();
   </script>
-
-  <pre id="debug"></pre>
 </body>
 </html>
