@@ -38,31 +38,16 @@
       background: #fff;
       transition: box-shadow .2s ease;
     }
-    .site-card:hover {
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-    .site-card .url {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-    }
-    .pill {
-      padding: .2rem .5rem;
-      border-radius: 999px;
-      font-size: .875rem;
-    }
+    .site-card:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .site-card .url { display: flex; align-items: center; gap: .5rem; }
+    .pill { padding: .2rem .5rem; border-radius: 999px; font-size: .875rem; }
     .pill.up { background: #e8f7ee; color: #207d41; }
     .pill.down { background: #fde8e8; color: #b42318; }
-
     pre#debug {
-      background: #111;
-      color: #9fe;
-      padding: 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      white-space: pre-wrap;
-      margin-top: 16px;
-      overflow-x: auto;
+      background: #111; color: #9fe;
+      padding: 8px; border-radius: 6px;
+      font-size: 12px; white-space: pre-wrap;
+      margin-top: 16px; overflow-x: auto;
     }
   </style>
 </head>
@@ -75,7 +60,8 @@
   <section id="sites" class="sites"></section>
 
   <script>
-    const apiBase = "/uptime/api"; // your repo path
+    // For your repo path
+    const basePath = "/uptime/history/";
 
     const debug = (msg) => {
       let box = document.getElementById('debug');
@@ -105,7 +91,7 @@
       return s;
     }
 
-    function renderCard(container, site, data) {
+    function renderCard(container, site) {
       const el = document.createElement('article');
       el.className = 'site-card';
 
@@ -122,72 +108,44 @@
 
       const status = document.createElement('div');
       status.className = 'status';
-      const upNow = (data.status?.status || '').toLowerCase() === 'up' || data.summary?.status === 'up';
-      status.appendChild(statusPill(upNow));
+      status.appendChild(statusPill(site.status === 'up'));
 
       const response = document.createElement('div');
       response.className = 'response';
-      const ms = data.responseMs ?? data.resp?.last24h ?? data.resp?.average ?? data.resp?.daily?.slice(-1)?.[0]?.value;
-      response.textContent = (ms != null && isFinite(ms)) ? Math.round(ms) + ' ms' : '—';
+      response.textContent = site.responseTime ? `${Math.round(site.responseTime)} ms` : '—';
 
       const uptime = document.createElement('div');
       uptime.className = 'uptime';
-      const pct = data.up?.overall ?? data.summary?.uptime ?? data.up?.weekly?.slice(-1)?.[0]?.uptime;
-      uptime.textContent = (pct != null && isFinite(pct)) ? Number(pct).toFixed(2) + '%' : '—';
+      uptime.textContent = site.uptime ? `${Number(site.uptime).toFixed(2)}%` : '—';
 
       el.append(url, status, response, uptime);
       container.appendChild(el);
     }
 
-    async function getSiteMetrics(slug) {
-      const [status, resp, up] = await Promise.all([
-        fetchJson(`${apiBase}/${slug}/status.json`).then(j => j || fetchJson(`${apiBase}/${slug}/summary.json`)),
-        fetchJson(`${apiBase}/${slug}/response-time.json`),
-        fetchJson(`${apiBase}/${slug}/uptime.json`)
-      ]);
-      return { status, resp, up };
-    }
-
     (async function init() {
-      debug(`apiBase resolved to: ${apiBase}`);
-
-      // Try /api/summary.json, then /history/summary.json
-      let summary = await fetchJson(`${apiBase}/summary.json`);
+      const summary = await fetchJson(`${basePath}summary.json`);
       if (!summary) {
-        const basePath = location.pathname.replace(/\/[^/]*$/, '/'); // "/uptime/"
-        summary = await fetchJson(`${basePath}history/summary.json`);
-      }
-      if (!summary) {
-        debug('No summary found at /api/summary.json or /history/summary.json.');
+        debug('No summary.json found under /history/.');
         return;
       }
 
-      const list = document.getElementById('sites');
-      if (!list) { debug('Missing #sites container'); return; }
-
       const sites = Array.isArray(summary)
-        ? summary.map(s => ({
-            slug: s.slug,
-            url: s.url || s.site || '',
-            name: s.name || s.title || s.slug,
-            _summary: s
-          }))
-        : (summary.sites || []).map(s => ({
-            slug: s.slug,
-            url: s.url,
-            name: s.name || s.slug,
-            _summary: s
-          }));
+        ? summary
+        : (summary.sites || []);
+      const list = document.getElementById('sites');
 
-      for (const site of sites) {
-        const metrics = await getSiteMetrics(site.slug);
-        metrics.summary = { status: site._summary?.status, uptime: site._summary?.uptime };
-        if (typeof site._summary?.responseTime === 'number')
-          metrics.responseMs = site._summary.responseTime;
-        renderCard(list, site, metrics);
-      }
+      sites.forEach(site => {
+        renderCard(list, {
+          name: site.name || site.slug,
+          url: site.url || site.site || '',
+          status: site.status,
+          responseTime: site.responseTime,
+          uptime: site.uptime
+        });
+      });
+
+      debug(`Loaded ${sites.length} sites from history/summary.json`);
     })();
   </script>
-
 </body>
 </html>
