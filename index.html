@@ -5,50 +5,20 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Status Dashboard</title>
   <style>
-    body {
-      font-family: system-ui, sans-serif;
-      margin: 2rem;
-      background: #fafafa;
-      color: #222;
-    }
-    .sites-header {
-      display: grid;
-      grid-template-columns: 1.6fr .6fr .6fr .8fr;
-      gap: .75rem;
-      padding: .75rem 1rem;
-      font-weight: 600;
-      background: #f6f7f9;
-      border: 1px solid #e3e6ea;
-      border-radius: .5rem;
-      margin: 1rem 0 .75rem;
-    }
-    .sites {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: .75rem;
-    }
-    .site-card {
-      display: grid;
-      grid-template-columns: 1.6fr .6fr .6fr .8fr;
-      gap: .75rem;
-      align-items: center;
-      padding: 1rem;
-      border: 1px solid #e3e6ea;
-      border-radius: .75rem;
-      background: #fff;
-      transition: box-shadow .2s ease;
-    }
-    .site-card:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-    .site-card .url { display: flex; align-items: center; gap: .5rem; }
-    .pill { padding: .2rem .5rem; border-radius: 999px; font-size: .875rem; }
-    .pill.up { background: #e8f7ee; color: #207d41; }
-    .pill.down { background: #fde8e8; color: #b42318; }
-    pre#debug {
-      background: #111; color: #9fe;
-      padding: 8px; border-radius: 6px;
-      font-size: 12px; white-space: pre-wrap;
-      margin-top: 16px; overflow-x: auto;
-    }
+    :root { --bg:#fafafa; --text:#222; --card:#fff; --br:#e3e6ea; --hdr:#f6f7f9; }
+    body { font-family: system-ui, sans-serif; margin: 2rem; background: var(--bg); color: var(--text); }
+    .sites-header { display:grid; grid-template-columns:1.6fr .6fr .6fr .8fr; gap:.75rem;
+      padding:.75rem 1rem; font-weight:600; background:var(--hdr); border:1px solid var(--br);
+      border-radius:.5rem; margin:1rem 0 .75rem; }
+    .sites { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:.75rem; }
+    .site-card { display:grid; grid-template-columns:1.6fr .6fr .6fr .8fr; gap:.75rem; align-items:center;
+      padding:1rem; border:1px solid var(--br); border-radius:.75rem; background:var(--card); transition: box-shadow .2s; }
+    .site-card:hover { box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+    .site-card .url { display:flex; align-items:center; gap:.5rem; }
+    .pill { padding:.2rem .5rem; border-radius:999px; font-size:.875rem; }
+    .pill.up { background:#e8f7ee; color:#207d41; }
+    .pill.down { background:#fde8e8; color:#b42318; }
+    pre#debug { background:#111;color:#9fe;padding:8px;border-radius:6px;font-size:12px;white-space:pre-wrap;margin-top:16px;overflow:auto; }
   </style>
 </head>
 <body>
@@ -60,27 +30,27 @@
   <section id="sites" class="sites"></section>
 
   <script>
-    // For your repo path
-    const basePath = "/uptime/history/";
+    // --- configure owner/repo for raw fallback ---
+    const OWNER  = "thinkintegrated-web";
+    const REPO   = "uptime";
+    const BRANCH_CANDIDATES = ["master", "main"]; // try both, repo shows "master" in your screenshot
 
+    // debug helper
     const debug = (msg) => {
       let box = document.getElementById('debug');
-      if (!box) {
-        box = document.createElement('pre');
-        box.id = 'debug';
-        document.body.appendChild(box);
-      }
-      box.textContent += (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)) + '\n';
+      if (!box) { box = document.createElement('pre'); box.id = 'debug'; document.body.appendChild(box); }
+      box.textContent += (typeof msg === 'string' ? msg : JSON.stringify(msg,null,2)) + '\n';
     };
 
     async function fetchJson(url) {
       try {
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-        return await res.json();
+        const json = await res.json();
+        return { ok: true, url, json };
       } catch (e) {
         debug(`Fetch failed: ${url} → ${e.message}`);
-        return null;
+        return { ok: false, url, json: null };
       }
     }
 
@@ -97,55 +67,119 @@
 
       const url = document.createElement('div');
       url.className = 'url';
-      const fav = document.createElement('img');
-      fav.height = 13;
-      fav.alt = '';
+      const fav = document.createElement('img'); fav.height = 13; fav.alt = '';
       try { fav.src = 'https://icons.duckduckgo.com/ip3/' + new URL(site.url).host + '.ico'; } catch {}
-      const a = document.createElement('a');
-      a.href = site.url;
-      a.textContent = site.name || site.url;
+      const a = document.createElement('a'); a.href = site.url; a.textContent = site.name || site.url || site.slug;
       url.append(fav, a);
 
-      const status = document.createElement('div');
-      status.className = 'status';
-      status.appendChild(statusPill(site.status === 'up'));
+      const status = document.createElement('div'); status.className = 'status';
+      status.appendChild(statusPill(String(site.status || "").toLowerCase() === 'up'));
 
-      const response = document.createElement('div');
-      response.className = 'response';
-      response.textContent = site.responseTime ? `${Math.round(site.responseTime)} ms` : '—';
+      const response = document.createElement('div'); response.className = 'response';
+      const ms = typeof site.responseTime === 'number' ? Math.round(site.responseTime) : null;
+      response.textContent = (ms != null && isFinite(ms)) ? `${ms} ms` : '—';
 
-      const uptime = document.createElement('div');
-      uptime.className = 'uptime';
-      uptime.textContent = site.uptime ? `${Number(site.uptime).toFixed(2)}%` : '—';
+      const uptime = document.createElement('div'); uptime.className = 'uptime';
+      const pct = site.uptime != null ? Number(site.uptime) : null;
+      uptime.textContent = (pct != null && isFinite(pct)) ? `${pct.toFixed(2)}%` : '—';
 
       el.append(url, status, response, uptime);
       container.appendChild(el);
     }
 
+    // very tiny YAML "parser" just for .upptimerc.yml sites: [] (no external libs)
+    function parseSitesFromYAML(yamlText) {
+      // looks for:
+      // sites:
+      //   - name: Example
+      //     url: https://example.com
+      const sites = [];
+      const lines = yamlText.split(/\r?\n/);
+      let inSites = false, current = null;
+      for (const raw of lines) {
+        const line = raw.replace(/\t/g, '  ');
+        if (!inSites) {
+          if (/^\s*sites\s*:\s*$/.test(line)) { inSites = true; }
+          continue;
+        }
+        if (/^\S/.test(line)) break; // left block (out of sites)
+        const mItem = /^\s*-\s*(?:name:\s*(.+))?$/.exec(line);
+        if (mItem) { if (current) sites.push(current); current = {}; if (mItem[1]) current.name = mItem[1].trim(); continue; }
+        const mName = /^\s*name:\s*(.+)$/.exec(line);
+        if (mName && current) { current.name = mName[1].trim(); continue; }
+        const mUrl = /^\s*url:\s*(.+)$/.exec(line);
+        if (mUrl && current) { current.url = mUrl[1].trim(); continue; }
+      }
+      if (current) sites.push(current);
+      return sites.filter(s => s.url);
+    }
+
     (async function init() {
-      const summary = await fetchJson(`${basePath}summary.json`);
+      const list = document.getElementById('sites');
+      const pageBase = new URL('.', location.href).href; // current folder (handles /, /uptime/, subpaths)
+      const tryUrls = [
+        new URL('api/summary.json', pageBase).href,
+        new URL('history/summary.json', pageBase).href,
+        location.origin + '/uptime/api/summary.json',
+        location.origin + '/uptime/history/summary.json',
+        // raw fallbacks will be appended below for both master/main
+      ];
+      BRANCH_CANDIDATES.forEach(br => {
+        tryUrls.push(`https://raw.githubusercontent.com/${OWNER}/${REPO}/${br}/history/summary.json`);
+      });
+
+      // Try each candidate until one succeeds
+      let summary = null, okUrl = null;
+      for (const u of tryUrls) {
+        const { ok, url, json } = await fetchJson(u);
+        if (ok && (Array.isArray(json) || (json && typeof json === 'object'))) {
+          summary = json; okUrl = url; break;
+        }
+      }
+
       if (!summary) {
-        debug('No summary.json found under /history/.');
+        debug('No summary found via any path. Falling back to .upptimerc.yml to at least list sites.');
+        // fallback to raw .upptimerc.yml
+        let rcText = null;
+        for (const br of BRANCH_CANDIDATES) {
+          const rcUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${br}/.upptimerc.yml`;
+          try {
+            const res = await fetch(rcUrl, { cache: 'no-store' });
+            if (res.ok) { rcText = await res.text(); okUrl = rcUrl; break; }
+            else debug(`Fetch failed: ${rcUrl} → ${res.status} ${res.statusText}`);
+          } catch (e) {
+            debug(`Fetch failed: ${rcUrl} → ${e.message}`);
+          }
+        }
+        if (rcText) {
+          const sites = parseSitesFromYAML(rcText);
+          if (sites.length) {
+            sites.forEach(s => renderCard(list, { name: s.name, url: s.url, status: 'unknown' }));
+            debug(`Rendered ${sites.length} sites from .upptimerc.yml (${okUrl}).`);
+            return;
+          }
+        }
+        debug('Could not load summary or parse .upptimerc.yml.');
         return;
       }
 
-      const sites = Array.isArray(summary)
-        ? summary
-        : (summary.sites || []);
-      const list = document.getElementById('sites');
+      debug(`Loaded summary from: ${okUrl}`);
 
-      sites.forEach(site => {
+      const rows = Array.isArray(summary) ? summary : (summary.sites || []);
+      rows.forEach(s => {
         renderCard(list, {
-          name: site.name || site.slug,
-          url: site.url || site.site || '',
-          status: site.status,
-          responseTime: site.responseTime,
-          uptime: site.uptime
+          slug: s.slug,
+          name: s.name || s.title || s.slug,
+          url:  s.url  || s.site  || '',
+          status: s.status,
+          responseTime: s.responseTime,
+          uptime: s.uptime
         });
       });
 
-      debug(`Loaded ${sites.length} sites from history/summary.json`);
+      if (!rows.length) debug('summary loaded but contains zero sites.');
     })();
   </script>
+
 </body>
 </html>
