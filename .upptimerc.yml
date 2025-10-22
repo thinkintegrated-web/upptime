@@ -52,18 +52,7 @@ status-website:
   introTitle: "**Upptime** - Client Uptime Monitoring"
   introMessage: Monitoring uptime and performance for our client websites.
   customHeadHtml: |
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #0f172a;
-        color: #f8fafc;
-      }
-      a {
-        color: #22d3ee;
-      }
-      .status {
-        border-radius: 6px;
-      }
-    </style>
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" href="custom.css">
 
 # Notifications and advanced config can go below if needed
