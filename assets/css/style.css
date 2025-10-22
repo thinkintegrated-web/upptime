@@ -1,3 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600&family=Hepta+Slab:wght@1..900&display=swap');
+
 body {
-  background:#2b2b2b;
+    background: linear-gradient(135deg,
+      rgba(218,165,32,0.9) 0%,     /* goldenrod */
+      rgb(192 74 53 / 90%) 25%,      /* burnt orange */
+      rgb(35 24 35 / 85%) 60%,    /* purple */
+      rgb(33 184 184 / 90%) 100%     /* teal */
+    );
+    color:#f1f1f1;
+    font-family:'Hepta Slab';
+}    
+
+body:after {
+    content:'';
+    position: fixed;
+    display: block;
+    font-size: 0px;
+    margin: 0px;
+    padding: 0px;
+    left: 0px;
+    top: 0px;
+    z-index: -1;
+    background-image: url(https://www.wethinkintegrated.com/wp-content/themes/think/img/fingerprint_background_dark.svg);
+    background-size: cover;
+    width: 100%;
+    height: 100%;
+    background-position: top right;
+}
+
+h1 {
+    background: url('https://wethinkintegrated.com/wp-content/uploads/2021/11/logo_alt-1.svg') no-repeat center center;
+    font-size: 0px;
+    width: 100%;
+    height: 190px;
+    display:none;
+}
+
+h1:first-child {
+    background: url('https://wethinkintegrated.com/wp-content/uploads/2021/11/logo_alt-1.svg') no-repeat center center;
+    font-size: 0px;
+    width: 100%;
+    height: 190px;
+    display:block;
+    position:relative;
+    font-family:'Barlow Condensed';
+}
+
+h1:first-child:after {
+    content:'HOSTED WEBSITE STATUS';
+    font-size:20px;
+    text-align:center;
+    position:absolute;
+    bottom:0px;
+    color:#ffff;
+    width: 100%;
+    height: 50px;
+    left: 0px;
+    right: 0px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body .markdown-body > p {
+    display:none;
+}
+
+body .markdown-body > p:nth-child(4) {
+    display:block;
+    margin:auto;
+    width:100%;
+    text-align:center;
 }
