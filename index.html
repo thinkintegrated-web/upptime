@@ -42,15 +42,7 @@
 
   <script>
 /* ---------- robust base + discovery + debug ---------- */
-
-// Figure out the base path of the repo (works for /, /repo/, and custom domains)
-function getApiBase() {
-  // directory containing index.html, e.g. "/" or "/uptime/"
-  const dir = location.pathname.endsWith('/') ? location.pathname : location.pathname.replace(/\/[^/]*$/, '/');
-  return dir + 'api'; // /api sits next to index.html
-}
-
-const apiBase = getApiBase();
+const apiBase = "/uptime/api";
 
 // Simple on-page debug panel
 const debug = (msg) => {
