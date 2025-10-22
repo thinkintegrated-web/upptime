@@ -31,16 +31,21 @@
 
   <script>
     // === configure for your repo ===
-    const OWNER  = "thinkintegrated-web";
-    const REPO   = "uptime";
-    const BRANCH = "master"; // change to "main" if you switch later
+    const OWNER   = "thinkintegrated-web";
+    const REPO    = "uptime";
+    const BRANCH  = "master"; // change to "main" if you switch later
 
-    // Build raw URLs (bypass Pages entirely)
+    // GitHub Pages site base (where your site is visible)
+    const PAGES_BASE = "/uptime/";
+
+    // Prefer Pages summary if present…
+    const SUMMARY_PAGES = location.origin + PAGES_BASE + "history/summary.json";
+    // …otherwise, fall back to raw .upptimerc.yml for the site list
     const RAW_BASE = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/`;
-    const SUMMARY_URL = RAW_BASE + "history/summary.json";
-    const apiRaw = (slug, file) => RAW_BASE + `api/${slug}/${file}`;
+    const RC_RAW   = RAW_BASE + ".upptimerc.yml";
+    const apiRaw   = (slug, file) => RAW_BASE + `api/${slug}/${file}`;
 
-    // debug (only shows if there's an issue)
+    // show debug only when needed
     function debug(msg) {
       let box = document.getElementById('debug');
       if (!box) { box = document.createElement('pre'); box.id = 'debug'; document.body.appendChild(box); }
@@ -48,15 +53,76 @@
       box.textContent += (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)) + '\n';
     }
 
+    async function fetchText(url) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        return await res.text();
+      } catch (e) { debug(`Fetch failed: ${url} → ${e.message}`); return null; }
+    }
     async function fetchJson(url) {
       try {
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
         return await res.json();
-      } catch (e) {
-        debug(`Fetch failed: ${url} → ${e.message}`);
-        return null;
+      } catch (e) { debug(`Fetch failed: ${url} → ${e.message}`); return null; }
+    }
+
+    // tiny YAML reader for just the sites list
+    function parseSitesFromRcYml(yamlText) {
+      const sites = [];
+      const lines = yamlText.split(/\r?\n/);
+      let inSites = false, current = null;
+      for (const raw of lines) {
+        const line = raw.replace(/\t/g, '  ');
+        if (!inSites) {
+          if (/^\s*sites\s*:\s*$/.test(line)) { inSites = true; continue; }
+        } else {
+          if (/^\S/.test(line)) break; // exited sites block
+          const mDash = /^\s*-\s*(.*)$/.exec(line);
+          if (mDash) { if (current) sites.push(current); current = {}; continue; }
+          const mName = /^\s*name:\s*(.+)$/.exec(line);
+          if (mName && current) { current.name = mName[1].trim(); continue; }
+          const mUrl = /^\s*url:\s*(.+)$/.exec(line);
+          if (mUrl && current) { current.url = mUrl[1].trim(); continue; }
+        }
       }
+      if (current) sites.push(current);
+      return sites.filter(s => s.url);
+    }
+
+    // build an Upptime slug from a URL
+    function slugFromUrl(u) {
+      try {
+        const host = new URL(u).host.toLowerCase().replace(/^www\./, "");
+        return host.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      } catch { return null; }
+    }
+
+    // helpers to read various JSON shapes
+    const last = (arr) => (Array.isArray(arr) && arr.length ? arr[arr.length - 1] : null);
+    function extractResponseMs(obj) {
+      if (obj == null) return null;
+      if (typeof obj === 'number') return obj;
+      if (typeof obj.average === 'number') return obj.average;
+      if (typeof obj.median === 'number') return obj.median;
+      if (typeof obj.last24h === 'number') return obj.last24h;
+      if (obj.daily)   { const d = last(obj.daily);   if (d && typeof d.value === 'number') return d.value; }
+      if (obj.weekly)  { const d = last(obj.weekly);  if (d && typeof d.value === 'number') return d.value; }
+      if (obj.monthly) { const d = last(obj.monthly); if (d && typeof d.value === 'number') return d.value; }
+      if (Array.isArray(obj) && typeof last(obj)?.value === 'number') return last(obj).value;
+      return null;
+    }
+    function extractUptimePct(obj) {
+      if (obj == null) return null;
+      if (typeof obj === 'number') return obj;
+      if (typeof obj.uptime === 'number') return obj.uptime;
+      if (typeof obj.overall === 'number') return obj.overall;
+      if (obj.daily)   { const d = last(obj.daily);   if (d && typeof d.uptime === 'number') return d.uptime; }
+      if (obj.weekly)  { const d = last(obj.weekly);  if (d && typeof d.uptime === 'number') return d.uptime; }
+      if (obj.monthly) { const d = last(obj.monthly); if (d && typeof d.uptime === 'number') return d.uptime; }
+      if (Array.isArray(obj) && typeof last(obj)?.uptime === 'number') return last(obj).uptime;
+      return null;
     }
 
     function pill(isUp) {
@@ -78,7 +144,11 @@
       url.append(fav, a);
 
       const status = document.createElement('div'); status.className = 'status';
-      status.appendChild(pill(String(site.status || "").toLowerCase() === 'up'));
+      if (site.status === 'up' || site.status === 'down') {
+        status.appendChild(pill(site.status === 'up'));
+      } else {
+        status.textContent = '—';
+      }
 
       const response = document.createElement('div'); response.className = 'response';
       const ms = (typeof metrics.responseMs === 'number') ? Math.round(metrics.responseMs) : null;
@@ -92,89 +162,57 @@
       container.appendChild(el);
     }
 
-    // helpers to read various upptime JSON shapes
-    const last = (arr) => (Array.isArray(arr) && arr.length ? arr[arr.length - 1] : null);
-
-    function extractResponseMs(obj) {
-      if (obj == null) return null;
-      if (typeof obj === 'number') return obj;
-      if (typeof obj.average === 'number') return obj.average;
-      if (typeof obj.median === 'number') return obj.median;
-      if (typeof obj.last24h === 'number') return obj.last24h;
-      if (obj.daily)  { const d = last(obj.daily);  if (d && typeof d.value === 'number') return d.value; }
-      if (obj.weekly) { const d = last(obj.weekly); if (d && typeof d.value === 'number') return d.value; }
-      if (obj.monthly){ const d = last(obj.monthly);if (d && typeof d.value === 'number') return d.value; }
-      if (Array.isArray(obj) && typeof last(obj)?.value === 'number') return last(obj).value;
-      return null;
-    }
-
-    function extractUptimePct(obj) {
-      if (obj == null) return null;
-      if (typeof obj === 'number') return obj;
-      if (typeof obj.uptime === 'number') return obj.uptime;
-      if (typeof obj.overall === 'number') return obj.overall;
-      if (obj.daily)   { const d = last(obj.daily);   if (d && typeof d.uptime === 'number') return d.uptime; }
-      if (obj.weekly)  { const d = last(obj.weekly);  if (d && typeof d.uptime === 'number') return d.uptime; }
-      if (obj.monthly) { const d = last(obj.monthly); if (d && typeof d.uptime === 'number') return d.uptime; }
-      if (Array.isArray(obj) && typeof last(obj)?.uptime === 'number') return last(obj).uptime;
-      return null;
-    }
-
-    async function loadPerSite(slug) {
-      // Try multiple files for resilience
-      const respCandidates = [
-        "response-time.json",
-        "response-time-day.json",
-        "response-time-week.json",
-        "response-time-month.json",
-        "response-time-year.json",
-      ].map(f => apiRaw(slug, f));
-
-      const upCandidates = [
-        "uptime.json",
-        "uptime-day.json",
-        "uptime-week.json",
-        "uptime-month.json",
-        "uptime-year.json",
-      ].map(f => apiRaw(slug, f));
+    async function loadPerSiteFromRaw(slug) {
+      const respFiles = ["response-time.json","response-time-day.json","response-time-week.json","response-time-month.json","response-time-year.json"];
+      const upFiles   = ["uptime.json","uptime-day.json","uptime-week.json","uptime-month.json","uptime-year.json"];
 
       let responseMs = null, uptimePct = null;
 
-      for (const u of respCandidates) {
-        const j = await fetchJson(u);
+      for (const f of respFiles) {
+        const j = await fetchJson(apiRaw(slug, f));
         const v = extractResponseMs(j);
         if (typeof v === 'number') { responseMs = v; break; }
       }
-
-      for (const u of upCandidates) {
-        const j = await fetchJson(u);
+      for (const f of upFiles) {
+        const j = await fetchJson(apiRaw(slug, f));
         const v = extractUptimePct(j);
         if (typeof v === 'number') { uptimePct = v; break; }
       }
-
       return { responseMs, uptimePct };
     }
 
     (async function init() {
-      // 1) Discover sites + status from raw summary
-      const summary = await fetchJson(SUMMARY_URL);
-      if (!summary) {
-        debug('Could not load history/summary.json from raw GitHub.');
-        return;
-      }
-
-      const rows = Array.isArray(summary) ? summary : (summary.sites || []);
       const list = document.getElementById('sites');
 
-      // 2) Render each site; fetch per-site response/uptime from raw API files
-      for (const s of rows) {
-        const site = {
+      // 1) Try Pages summary (gives us real status)
+      let sites = null;
+      const summary = await fetchJson(SUMMARY_PAGES);
+      if (summary) {
+        const rows = Array.isArray(summary) ? summary : (summary.sites || []);
+        sites = rows.map(s => ({
           slug:   s.slug,
           name:   s.name || s.title || s.slug,
           url:    s.url  || s.site  || '',
-          status: s.status
-        };
-        const metrics = await loadPerSite(site.slug);
+          status: (s.status || "").toLowerCase()
+        }));
+      } else {
+        debug("Pages summary not available; falling back to raw .upptimerc.yml (status will show as —).");
+        // 2) Fall back to raw .upptimerc.yml for site list
+        const rc = await fetchText(RC_RAW);
+        if (!rc) { debug("Could not fetch .upptimerc.yml from raw."); return; }
+        const parsed = parseSitesFromRcYml(rc);
+        if (!parsed.length) { debug("Parsed .upptimerc.yml but found no sites."); return; }
+        sites = parsed.map(s => ({
+          slug: slugFromUrl(s.url),
+          name: s.name || s.url,
+          url:  s.url,
+          status: null // unknown without summary.json
+        }));
+      }
+
+      // 3) For each site, pull metrics from raw API JSON and render
+      for (const site of sites) {
+        const metrics = site.slug ? await loadPerSiteFromRaw(site.slug) : { responseMs: null, uptimePct: null };
         renderCard(list, site, metrics);
       }
     })();
