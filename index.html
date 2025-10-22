@@ -18,7 +18,7 @@
     .pill { padding:.2rem .5rem; border-radius:999px; font-size:.875rem; }
     .pill.up { background:#e8f7ee; color:#207d41; }
     .pill.down { background:#fde8e8; color:#b42318; }
-    pre#debug { background:#111;color:#9fe;padding:8px;border-radius:6px;font-size:12px;white-space:pre-wrap;margin-top:16px;overflow:auto; }
+    pre#debug { background:#111;color:#9fe;padding:8px;border-radius:6px;font-size:12px;white-space:pre-wrap;margin-top:16px;overflow:auto; display:none; }
   </style>
 </head>
 <body>
@@ -30,16 +30,23 @@
   <section id="sites" class="sites"></section>
 
   <script>
-    // Published at: https://thinkintegrated-web.github.io/uptime/
-    const PAGES_BASE   = "/uptime/";
-    const HISTORY_BASE = PAGES_BASE + "history/";
-    const API_BASE     = PAGES_BASE + "api/";
+    // === configure for your repo ===
+    const OWNER  = "thinkintegrated-web";
+    const REPO   = "uptime";
+    const BRANCH = "master"; // change to "main" if you switch later
 
-    const debug = (msg) => {
+    // Build raw URLs (bypass Pages entirely)
+    const RAW_BASE = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/`;
+    const SUMMARY_URL = RAW_BASE + "history/summary.json";
+    const apiRaw = (slug, file) => RAW_BASE + `api/${slug}/${file}`;
+
+    // debug (only shows if there's an issue)
+    function debug(msg) {
       let box = document.getElementById('debug');
       if (!box) { box = document.createElement('pre'); box.id = 'debug'; document.body.appendChild(box); }
+      box.style.display = 'block';
       box.textContent += (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)) + '\n';
-    };
+    }
 
     async function fetchJson(url) {
       try {
@@ -47,8 +54,7 @@
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
         return await res.json();
       } catch (e) {
-        // comment out next line if you want totally silent failures
-        // debug(`Fetch failed: ${url} → ${e.message}`);
+        debug(`Fetch failed: ${url} → ${e.message}`);
         return null;
       }
     }
@@ -86,7 +92,7 @@
       container.appendChild(el);
     }
 
-    // Extract helpers to handle many possible shapes
+    // helpers to read various upptime JSON shapes
     const last = (arr) => (Array.isArray(arr) && arr.length ? arr[arr.length - 1] : null);
 
     function extractResponseMs(obj) {
@@ -115,65 +121,57 @@
     }
 
     async function loadPerSite(slug) {
-      // Try multiple files for each metric until we get a number
+      // Try multiple files for resilience
       const respCandidates = [
-        `${API_BASE}${slug}/response-time.json`,
-        `${API_BASE}${slug}/response-time-day.json`,
-        `${API_BASE}${slug}/response-time-week.json`,
-        `${API_BASE}${slug}/response-time-month.json`,
-        `${API_BASE}${slug}/response-time-year.json`,
-      ];
-      const upCandidates = [
-        `${API_BASE}${slug}/uptime.json`,
-        `${API_BASE}${slug}/uptime-day.json`,
-        `${API_BASE}${slug}/uptime-week.json`,
-        `${API_BASE}${slug}/uptime-month.json`,
-        `${API_BASE}${slug}/uptime-year.json`,
-      ];
+        "response-time.json",
+        "response-time-day.json",
+        "response-time-week.json",
+        "response-time-month.json",
+        "response-time-year.json",
+      ].map(f => apiRaw(slug, f));
 
-      let responseMs = null, uptimePct = null, tried = [];
+      const upCandidates = [
+        "uptime.json",
+        "uptime-day.json",
+        "uptime-week.json",
+        "uptime-month.json",
+        "uptime-year.json",
+      ].map(f => apiRaw(slug, f));
+
+      let responseMs = null, uptimePct = null;
 
       for (const u of respCandidates) {
         const j = await fetchJson(u);
-        if (j != null) {
-          const v = extractResponseMs(j);
-          if (typeof v === 'number') { responseMs = v; break; }
-        }
-        tried.push(u);
+        const v = extractResponseMs(j);
+        if (typeof v === 'number') { responseMs = v; break; }
       }
 
       for (const u of upCandidates) {
         const j = await fetchJson(u);
-        if (j != null) {
-          const v = extractUptimePct(j);
-          if (typeof v === 'number') { uptimePct = v; break; }
-        }
-        tried.push(u);
-      }
-
-      if (responseMs == null || uptimePct == null) {
-        debug(`(${slug}) missing -> response:${responseMs==null?'✗':'✓'} uptime:${uptimePct==null?'✗':'✓'}`);
+        const v = extractUptimePct(j);
+        if (typeof v === 'number') { uptimePct = v; break; }
       }
 
       return { responseMs, uptimePct };
     }
 
     (async function init() {
-      // Discover sites + status from history
-      const summary = await fetchJson(`${HISTORY_BASE}summary.json`);
+      // 1) Discover sites + status from raw summary
+      const summary = await fetchJson(SUMMARY_URL);
       if (!summary) {
-        debug('No summary.json under /history/. Make sure workflows have run and Pages publishes /uptime/.');
+        debug('Could not load history/summary.json from raw GitHub.');
         return;
       }
 
       const rows = Array.isArray(summary) ? summary : (summary.sites || []);
       const list = document.getElementById('sites');
 
+      // 2) Render each site; fetch per-site response/uptime from raw API files
       for (const s of rows) {
         const site = {
-          slug:  s.slug,
-          name:  s.name || s.title || s.slug,
-          url:   s.url  || s.site  || '',
+          slug:   s.slug,
+          name:   s.name || s.title || s.slug,
+          url:    s.url  || s.site  || '',
           status: s.status
         };
         const metrics = await loadPerSite(site.slug);
