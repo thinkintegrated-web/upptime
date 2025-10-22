@@ -18,7 +18,7 @@
     .pill { padding:.2rem .5rem; border-radius:999px; font-size:.875rem; }
     .pill.up { background:#e8f7ee; color:#207d41; }
     .pill.down { background:#fde8e8; color:#b42318; }
-    pre#debug { background:#111;color:#9fe;padding:8px;border-radius:6px;font-size:12px;white-space:pre-wrap;margin-top:16px;overflow:auto; }
+    pre#debug { background:#111;color:#9fe;padding:8px;border-radius:6px;font-size:12px;white-space:pre-wrap;margin-top:16px;overflow:auto; display:none }
   </style>
 </head>
 <body>
@@ -30,38 +30,38 @@
   <section id="sites" class="sites"></section>
 
   <script>
-    // --- configure owner/repo for raw fallback ---
-    const OWNER  = "thinkintegrated-web";
-    const REPO   = "uptime";
-    const BRANCH_CANDIDATES = ["master", "main"]; // try both, repo shows "master" in your screenshot
+    // Paths for your repo published at https://thinkintegrated-web.github.io/uptime/
+    const PAGES_BASE   = "/uptime/";
+    const HISTORY_BASE = PAGES_BASE + "history/";
+    const API_BASE     = PAGES_BASE + "api/";
 
-    // debug helper
-    const debug = (msg) => {
+    // Show debug only if something fails
+    function debug(msg) {
       let box = document.getElementById('debug');
       if (!box) { box = document.createElement('pre'); box.id = 'debug'; document.body.appendChild(box); }
-      box.textContent += (typeof msg === 'string' ? msg : JSON.stringify(msg,null,2)) + '\n';
-    };
+      box.style.display = 'block';
+      box.textContent += (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)) + '\n';
+    }
 
     async function fetchJson(url) {
       try {
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-        const json = await res.json();
-        return { ok: true, url, json };
+        return await res.json();
       } catch (e) {
         debug(`Fetch failed: ${url} → ${e.message}`);
-        return { ok: false, url, json: null };
+        return null;
       }
     }
 
-    function statusPill(upNow) {
+    function pill(isUp) {
       const s = document.createElement('span');
-      s.className = 'pill ' + (upNow ? 'up' : 'down');
-      s.textContent = upNow ? 'Up' : 'Down';
+      s.className = 'pill ' + (isUp ? 'up' : 'down');
+      s.textContent = isUp ? 'Up' : 'Down';
       return s;
     }
 
-    function renderCard(container, site) {
+    function renderCard(container, site, metrics) {
       const el = document.createElement('article');
       el.className = 'site-card';
 
@@ -73,113 +73,71 @@
       url.append(fav, a);
 
       const status = document.createElement('div'); status.className = 'status';
-      status.appendChild(statusPill(String(site.status || "").toLowerCase() === 'up'));
+      status.appendChild(pill(String(site.status || "").toLowerCase() === 'up'));
 
       const response = document.createElement('div'); response.className = 'response';
-      const ms = typeof site.responseTime === 'number' ? Math.round(site.responseTime) : null;
+      const ms = (typeof metrics.responseMs === 'number') ? Math.round(metrics.responseMs) : null;
       response.textContent = (ms != null && isFinite(ms)) ? `${ms} ms` : '—';
 
       const uptime = document.createElement('div'); uptime.className = 'uptime';
-      const pct = site.uptime != null ? Number(site.uptime) : null;
+      const pct = (typeof metrics.uptimePct === 'number') ? metrics.uptimePct : null;
       uptime.textContent = (pct != null && isFinite(pct)) ? `${pct.toFixed(2)}%` : '—';
 
       el.append(url, status, response, uptime);
       container.appendChild(el);
     }
 
-    // very tiny YAML "parser" just for .upptimerc.yml sites: [] (no external libs)
-    function parseSitesFromYAML(yamlText) {
-      // looks for:
-      // sites:
-      //   - name: Example
-      //     url: https://example.com
-      const sites = [];
-      const lines = yamlText.split(/\r?\n/);
-      let inSites = false, current = null;
-      for (const raw of lines) {
-        const line = raw.replace(/\t/g, '  ');
-        if (!inSites) {
-          if (/^\s*sites\s*:\s*$/.test(line)) { inSites = true; }
-          continue;
-        }
-        if (/^\S/.test(line)) break; // left block (out of sites)
-        const mItem = /^\s*-\s*(?:name:\s*(.+))?$/.exec(line);
-        if (mItem) { if (current) sites.push(current); current = {}; if (mItem[1]) current.name = mItem[1].trim(); continue; }
-        const mName = /^\s*name:\s*(.+)$/.exec(line);
-        if (mName && current) { current.name = mName[1].trim(); continue; }
-        const mUrl = /^\s*url:\s*(.+)$/.exec(line);
-        if (mUrl && current) { current.url = mUrl[1].trim(); continue; }
+    async function loadPerSite(slug) {
+      // Use response-time.json and uptime.json from /api/<slug>/
+      const [resp, up] = await Promise.all([
+        fetchJson(`${API_BASE}${slug}/response-time.json`),
+        fetchJson(`${API_BASE}${slug}/uptime.json`)
+      ]);
+
+      // response-time.json often has last24h or average; fallback to last daily entry
+      let responseMs = null;
+      if (resp) {
+        responseMs = resp.last24h ?? resp.average ??
+                     (Array.isArray(resp.daily) && resp.daily.length ? resp.daily.at(-1).value : null);
       }
-      if (current) sites.push(current);
-      return sites.filter(s => s.url);
+
+      // uptime.json often has overall or weekly/monthly aggregates
+      let uptimePct = null;
+      if (up) {
+        uptimePct = up.overall ?? 
+                    (Array.isArray(up.weekly) && up.weekly.length ? up.weekly.at(-1).uptime : null) ??
+                    (Array.isArray(up.monthly) && up.monthly.length ? up.monthly.at(-1).uptime : null);
+      }
+
+      return { responseMs, uptimePct };
     }
 
     (async function init() {
-      const list = document.getElementById('sites');
-      const pageBase = new URL('.', location.href).href; // current folder (handles /, /uptime/, subpaths)
-      const tryUrls = [
-        new URL('api/summary.json', pageBase).href,
-        new URL('history/summary.json', pageBase).href,
-        location.origin + '/uptime/api/summary.json',
-        location.origin + '/uptime/history/summary.json',
-        // raw fallbacks will be appended below for both master/main
-      ];
-      BRANCH_CANDIDATES.forEach(br => {
-        tryUrls.push(`https://raw.githubusercontent.com/${OWNER}/${REPO}/${br}/history/summary.json`);
-      });
-
-      // Try each candidate until one succeeds
-      let summary = null, okUrl = null;
-      for (const u of tryUrls) {
-        const { ok, url, json } = await fetchJson(u);
-        if (ok && (Array.isArray(json) || (json && typeof json === 'object'))) {
-          summary = json; okUrl = url; break;
-        }
-      }
-
+      // 1) Discover sites from history/summary.json (don’t try api/summary.json to avoid the 404)
+      const summary = await fetchJson(`${HISTORY_BASE}summary.json`);
       if (!summary) {
-        debug('No summary found via any path. Falling back to .upptimerc.yml to at least list sites.');
-        // fallback to raw .upptimerc.yml
-        let rcText = null;
-        for (const br of BRANCH_CANDIDATES) {
-          const rcUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${br}/.upptimerc.yml`;
-          try {
-            const res = await fetch(rcUrl, { cache: 'no-store' });
-            if (res.ok) { rcText = await res.text(); okUrl = rcUrl; break; }
-            else debug(`Fetch failed: ${rcUrl} → ${res.status} ${res.statusText}`);
-          } catch (e) {
-            debug(`Fetch failed: ${rcUrl} → ${e.message}`);
-          }
-        }
-        if (rcText) {
-          const sites = parseSitesFromYAML(rcText);
-          if (sites.length) {
-            sites.forEach(s => renderCard(list, { name: s.name, url: s.url, status: 'unknown' }));
-            debug(`Rendered ${sites.length} sites from .upptimerc.yml (${okUrl}).`);
-            return;
-          }
-        }
-        debug('Could not load summary or parse .upptimerc.yml.');
+        debug('No summary.json under /history/. Make sure workflows have run and Pages is publishing /uptime/.');
         return;
       }
 
-      debug(`Loaded summary from: ${okUrl}`);
-
       const rows = Array.isArray(summary) ? summary : (summary.sites || []);
-      rows.forEach(s => {
-        renderCard(list, {
-          slug: s.slug,
-          name: s.name || s.title || s.slug,
-          url:  s.url  || s.site  || '',
-          status: s.status,
-          responseTime: s.responseTime,
-          uptime: s.uptime
-        });
-      });
+      const list = document.getElementById('sites');
 
-      if (!rows.length) debug('summary loaded but contains zero sites.');
+      // 2) Render each site; fetch per-site response/uptime
+      for (const s of rows) {
+        const site = {
+          slug:  s.slug,
+          name:  s.name || s.title || s.slug,
+          url:   s.url  || s.site  || '',
+          status: s.status // from summary only
+        };
+
+        const metrics = await loadPerSite(site.slug);
+        renderCard(list, site, metrics);
+      }
     })();
   </script>
 
+  <pre id="debug"></pre>
 </body>
 </html>
