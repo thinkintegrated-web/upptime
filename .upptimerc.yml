@@ -51,8 +51,5 @@ status-website:
   name: Think Integrated Upptime
   introTitle: "**Upptime** - Client Uptime Monitoring"
   introMessage: Monitoring uptime and performance for our client websites.
-  customHeadHtml: |
-    <!-- Custom stylesheet -->
-    <link rel="stylesheet" href="custom.css">
 
 # Notifications and advanced config can go below if needed
