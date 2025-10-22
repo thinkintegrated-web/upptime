@@ -41,93 +41,127 @@
   </template>
 
   <script>
-    /**
-     * Tell the page WHICH sites you want and WHERE their JSON lives.
-     * slug = the folder name under /api/ (created by Upptime)
-     * url  = the site URL you monitor
-     * name = the label to display
-     */
-    const SITES = [
-      { slug: "bhpchamber-org",     url: "https://www.bhpchamber.org",     name: "bhpchamber.org" },
-      { slug: "blacktipit-com",     url: "https://www.blacktipit.com",     name: "blacktipit.com" },
-      { slug: "ciaimaging-com",     url: "https://www.ciaimaging.com",     name: "ciaimaging.com" },
-      // ...add the rest here (one line per monitored site)
-    ];
+/* ---------- robust base + discovery + debug ---------- */
 
-    // If your repo is published at owner.github.io/repo, apiBase is "/repo/api"
-    // If it’s at a custom domain at repo root, apiBase is just "/api"
-    const apiBase = "/api";
+// Figure out the base path of the repo (works for /, /repo/, and custom domains)
+function getApiBase() {
+  // directory containing index.html, e.g. "/" or "/uptime/"
+  const dir = location.pathname.endsWith('/') ? location.pathname : location.pathname.replace(/\/[^/]*$/, '/');
+  return dir + 'api'; // /api sits next to index.html
+}
 
-    async function getSiteData(slug) {
-      // Upptime usually exposes these JSON endpoints per site:
-      //   /api/<slug>/status.json          -> latest status ("up"/"down"), code
-      //   /api/<slug>/response-time.json   -> latest + history (ms)
-      //   /api/<slug>/uptime.json          -> uptime % (overall / periods)
-      const [status, resp, up] = await Promise.all([
-        fetch(`${apiBase}/${slug}/status.json`).then(r => r.json()),
-        fetch(`${apiBase}/${slug}/response-time.json`).then(r => r.json()),
-        fetch(`${apiBase}/${slug}/uptime.json`).then(r => r.json()),
-      ]);
-      return { status, resp, up };
-    }
+const apiBase = getApiBase();
 
-    function renderCard(container, site, data) {
-      const tpl = document.getElementById("site-card-tpl").content.cloneNode(true);
-      const a = tpl.querySelector("[data-link]");
-      const fav = tpl.querySelector("[data-favicon]");
-      const statusEl = tpl.querySelector("[data-status]");
-      const responseEl = tpl.querySelector("[data-response]");
-      const uptimeEl = tpl.querySelector("[data-uptime]");
+// Simple on-page debug panel
+const debug = (msg) => {
+  let box = document.getElementById('debug');
+  if (!box) {
+    box = document.createElement('pre');
+    box.id = 'debug';
+    box.style.cssText = 'background:#111;color:#9fe;padding:8px;border-radius:6px;font-size:12px;white-space:pre-wrap;margin-top:16px;';
+    document.body.appendChild(box);
+  }
+  box.textContent += (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)) + '\n';
+};
 
-      a.href = site.url;
-      a.textContent = site.name;
-      fav.src = `https://icons.duckduckgo.com/ip3/${new URL(site.url).host}.ico`;
+// Render helpers
+function statusPill(upNow) {
+  const span = document.createElement('span');
+  span.className = 'pill ' + (upNow ? 'up' : 'down');
+  span.textContent = upNow ? 'Up' : 'Down';
+  return span;
+}
 
-      const upNow = (data.status?.status ?? "").toLowerCase() === "up";
-      statusEl.textContent = upNow ? "Up" : "Down";
-      statusEl.classList.add(upNow ? "up" : "down");
+function renderCard(container, site, data) {
+  const article = document.createElement('article');
+  article.className = 'site-card';
 
-      // response-time.json commonly has { average, last24h, daily: [...] } – fallback to any available number
-      const lastMs = data.resp?.last24h ?? data.resp?.average ?? data.resp?.daily?.slice(-1)?.[0]?.value;
-      responseEl.textContent = lastMs != null ? `${Math.round(lastMs)} ms` : "—";
+  const url = document.createElement('div');
+  url.className = 'url';
+  const fav = document.createElement('img');
+  fav.height = 13; fav.alt = '';
+  try { fav.src = 'https://icons.duckduckgo.com/ip3/' + new URL(site.url).host + '.ico'; } catch(e) {}
+  const a = document.createElement('a');
+  a.href = site.url; a.textContent = site.name || site.url;
+  url.append(fav, a);
 
-      // uptime.json commonly has { overall, daily/weekly/monthly: [...] }
-      const uptimePct = data.up?.overall ?? data.up?.weekly?.slice(-1)?.[0]?.uptime;
-      uptimeEl.textContent = uptimePct != null ? `${Number(uptimePct).toFixed(2)}%` : "—";
+  const status = document.createElement('div');
+  status.className = 'status';
+  const upNow = (data.status?.status || '').toLowerCase() === 'up' || data.summary?.status === 'up';
+  status.appendChild(statusPill(upNow));
 
-      container.appendChild(tpl);
-    }
+  const response = document.createElement('div');
+  response.className = 'response';
+  const ms = data.responseMs ?? data.resp?.last24h ?? data.resp?.average ?? data.resp?.daily?.slice(-1)?.[0]?.value;
+  response.textContent = (ms != null && isFinite(ms)) ? Math.round(ms) + ' ms' : '—';
 
-    (async function init() {
-      const list = document.getElementById("sites");
+  const uptime = document.createElement('div');
+  uptime.className = 'uptime';
+  const pct = data.up?.overall ?? data.summary?.uptime ?? data.up?.weekly?.slice(-1)?.[0]?.uptime;
+  uptime.textContent = (pct != null && isFinite(pct)) ? Number(pct).toFixed(2) + '%' : '—';
 
-      // Populate the main list exactly where #sites sits
-      for (const site of SITES) {
-        try {
-          const data = await getSiteData(site.slug);
-          renderCard(list, site, data);
-        } catch (e) {
-          console.error("Failed to load", site.slug, e);
-        }
-      }
+  article.append(url, status, response, uptime);
+  container.appendChild(article);
+}
 
-      // Example: populate another section elsewhere on the page
-      // (You control placement by choosing the element you append into.)
-      const fastest = document.getElementById("fastest");
-      if (fastest) {
-        // naive “fastest” example using already-rendered cards:
-        const cards = Array.from(list.querySelectorAll(".site-card"));
-        cards.sort((a, b) => {
-          const ms = el => parseInt(el.querySelector("[data-response]").textContent) || Infinity;
-          return ms(a) - ms(b);
-        });
-        if (cards.length) {
-          const top = cards[0].cloneNode(true);
-          fastest.innerHTML = "<h2>Fastest site right now</h2>";
-          fastest.appendChild(top);
-        }
-      }
-    })();
-  </script>
+async function fetchJson(path) {
+  const url = `${apiBase}/${path}`;
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    return await res.json();
+  } catch (e) {
+    debug(`Fetch failed: ${url} → ${e.message}`);
+    return null;
+  }
+}
+
+async function getSiteMetrics(slug) {
+  // Try the file names used by recent Upptime versions
+  const [status, resp, up] = await Promise.all([
+    fetchJson(`${slug}/status.json`)            // has .status = "up" | "down"
+      .then(j => j || fetchJson(`${slug}/summary.json`)), // fallback
+    fetchJson(`${slug}/response-time.json`),
+    fetchJson(`${slug}/uptime.json`)
+  ]);
+  return { status, resp, up };
+}
+
+(async function init() {
+  debug(`apiBase resolved to: ${apiBase}`);
+
+  // Discover sites from summary.json (generated by Upptime)
+  const summary = await fetchJson(`summary.json`);
+  if (!summary || !Array.isArray(summary)) {
+    debug('No /api/summary.json found or not an array. Check that /api exists next to index.html.');
+    return;
+  }
+
+  // summary entries typically look like:
+  // { "slug": "example-com", "url": "https://example.com", "name": "example.com", "status": "up", "uptime": 99.99, ... }
+  const sites = summary.map(s => ({
+    slug: s.slug,
+    url: s.url || (s.site || ''),
+    name: s.name || s.title || s.slug,
+    _summary: s
+  }));
+
+  const list = document.getElementById('sites');
+  if (!list) {
+    debug('Missing #sites container in the HTML.');
+    return;
+  }
+
+  for (const site of sites) {
+    const metrics = await getSiteMetrics(site.slug);
+    // pass through some summary values in case per-site files are missing
+    metrics.summary = { status: site._summary.status, uptime: site._summary.uptime };
+    // Some Upptime versions expose "responseTime" on summary
+    if (typeof site._summary.responseTime === 'number') metrics.responseMs = site._summary.responseTime;
+    renderCard(list, site, metrics);
+  }
+})();
+</script>
+
 </body>
 </html>
