@@ -1,0 +1,34 @@
+/* Dark theme tweaks & aesthetic polish */
+:root {
+  --ti-primary: #22d3ee; /* cyan accent */
+  --ti-muted: #94a3b8;   /* slate-300-ish */
+}
+
+body {
+  letter-spacing: 0.2px;
+}
+
+/* Header/footer glassy look */
+.bg-dark-subtle {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(6px);
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Table polish */
+.table-dark.table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+a.link-light:hover {
+  color: var(--ti-primary) !important;
+  text-decoration: underline;
+}
+
+/* Small screens: make the table breathe a bit */
+@media (max-width: 576px) {
+  #sites-table td, #sites-table th {
+    padding-top: .6rem;
+    padding-bottom: .6rem;
+  }
+}
