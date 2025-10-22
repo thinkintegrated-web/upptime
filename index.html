@@ -18,7 +18,7 @@
     .pill { padding:.2rem .5rem; border-radius:999px; font-size:.875rem; }
     .pill.up { background:#e8f7ee; color:#207d41; }
     .pill.down { background:#fde8e8; color:#b42318; }
-    pre#debug { background:#111;color:#9fe;padding:8px;border-radius:6px;font-size:12px;white-space:pre-wrap;margin-top:16px;overflow:auto; display:none }
+    pre#debug { background:#111;color:#9fe;padding:8px;border-radius:6px;font-size:12px;white-space:pre-wrap;margin-top:16px;overflow:auto; }
   </style>
 </head>
 <body>
@@ -30,18 +30,16 @@
   <section id="sites" class="sites"></section>
 
   <script>
-    // Paths for your repo published at https://thinkintegrated-web.github.io/uptime/
+    // Published at: https://thinkintegrated-web.github.io/uptime/
     const PAGES_BASE   = "/uptime/";
     const HISTORY_BASE = PAGES_BASE + "history/";
     const API_BASE     = PAGES_BASE + "api/";
 
-    // Show debug only if something fails
-    function debug(msg) {
+    const debug = (msg) => {
       let box = document.getElementById('debug');
       if (!box) { box = document.createElement('pre'); box.id = 'debug'; document.body.appendChild(box); }
-      box.style.display = 'block';
       box.textContent += (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)) + '\n';
-    }
+    };
 
     async function fetchJson(url) {
       try {
@@ -49,7 +47,8 @@
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
         return await res.json();
       } catch (e) {
-        debug(`Fetch failed: ${url} → ${e.message}`);
+        // comment out next line if you want totally silent failures
+        // debug(`Fetch failed: ${url} → ${e.message}`);
         return null;
       }
     }
@@ -87,51 +86,96 @@
       container.appendChild(el);
     }
 
-    async function loadPerSite(slug) {
-      // Use response-time.json and uptime.json from /api/<slug>/
-      const [resp, up] = await Promise.all([
-        fetchJson(`${API_BASE}${slug}/response-time.json`),
-        fetchJson(`${API_BASE}${slug}/uptime.json`)
-      ]);
+    // Extract helpers to handle many possible shapes
+    const last = (arr) => (Array.isArray(arr) && arr.length ? arr[arr.length - 1] : null);
 
-      // response-time.json often has last24h or average; fallback to last daily entry
-      let responseMs = null;
-      if (resp) {
-        responseMs = resp.last24h ?? resp.average ??
-                     (Array.isArray(resp.daily) && resp.daily.length ? resp.daily.at(-1).value : null);
+    function extractResponseMs(obj) {
+      if (obj == null) return null;
+      if (typeof obj === 'number') return obj;
+      if (typeof obj.average === 'number') return obj.average;
+      if (typeof obj.median === 'number') return obj.median;
+      if (typeof obj.last24h === 'number') return obj.last24h;
+      if (obj.daily)  { const d = last(obj.daily);  if (d && typeof d.value === 'number') return d.value; }
+      if (obj.weekly) { const d = last(obj.weekly); if (d && typeof d.value === 'number') return d.value; }
+      if (obj.monthly){ const d = last(obj.monthly);if (d && typeof d.value === 'number') return d.value; }
+      if (Array.isArray(obj) && typeof last(obj)?.value === 'number') return last(obj).value;
+      return null;
+    }
+
+    function extractUptimePct(obj) {
+      if (obj == null) return null;
+      if (typeof obj === 'number') return obj;
+      if (typeof obj.uptime === 'number') return obj.uptime;
+      if (typeof obj.overall === 'number') return obj.overall;
+      if (obj.daily)   { const d = last(obj.daily);   if (d && typeof d.uptime === 'number') return d.uptime; }
+      if (obj.weekly)  { const d = last(obj.weekly);  if (d && typeof d.uptime === 'number') return d.uptime; }
+      if (obj.monthly) { const d = last(obj.monthly); if (d && typeof d.uptime === 'number') return d.uptime; }
+      if (Array.isArray(obj) && typeof last(obj)?.uptime === 'number') return last(obj).uptime;
+      return null;
+    }
+
+    async function loadPerSite(slug) {
+      // Try multiple files for each metric until we get a number
+      const respCandidates = [
+        `${API_BASE}${slug}/response-time.json`,
+        `${API_BASE}${slug}/response-time-day.json`,
+        `${API_BASE}${slug}/response-time-week.json`,
+        `${API_BASE}${slug}/response-time-month.json`,
+        `${API_BASE}${slug}/response-time-year.json`,
+      ];
+      const upCandidates = [
+        `${API_BASE}${slug}/uptime.json`,
+        `${API_BASE}${slug}/uptime-day.json`,
+        `${API_BASE}${slug}/uptime-week.json`,
+        `${API_BASE}${slug}/uptime-month.json`,
+        `${API_BASE}${slug}/uptime-year.json`,
+      ];
+
+      let responseMs = null, uptimePct = null, tried = [];
+
+      for (const u of respCandidates) {
+        const j = await fetchJson(u);
+        if (j != null) {
+          const v = extractResponseMs(j);
+          if (typeof v === 'number') { responseMs = v; break; }
+        }
+        tried.push(u);
       }
 
-      // uptime.json often has overall or weekly/monthly aggregates
-      let uptimePct = null;
-      if (up) {
-        uptimePct = up.overall ?? 
-                    (Array.isArray(up.weekly) && up.weekly.length ? up.weekly.at(-1).uptime : null) ??
-                    (Array.isArray(up.monthly) && up.monthly.length ? up.monthly.at(-1).uptime : null);
+      for (const u of upCandidates) {
+        const j = await fetchJson(u);
+        if (j != null) {
+          const v = extractUptimePct(j);
+          if (typeof v === 'number') { uptimePct = v; break; }
+        }
+        tried.push(u);
+      }
+
+      if (responseMs == null || uptimePct == null) {
+        debug(`(${slug}) missing -> response:${responseMs==null?'✗':'✓'} uptime:${uptimePct==null?'✗':'✓'}`);
       }
 
       return { responseMs, uptimePct };
     }
 
     (async function init() {
-      // 1) Discover sites from history/summary.json (don’t try api/summary.json to avoid the 404)
+      // Discover sites + status from history
       const summary = await fetchJson(`${HISTORY_BASE}summary.json`);
       if (!summary) {
-        debug('No summary.json under /history/. Make sure workflows have run and Pages is publishing /uptime/.');
+        debug('No summary.json under /history/. Make sure workflows have run and Pages publishes /uptime/.');
         return;
       }
 
       const rows = Array.isArray(summary) ? summary : (summary.sites || []);
       const list = document.getElementById('sites');
 
-      // 2) Render each site; fetch per-site response/uptime
       for (const s of rows) {
         const site = {
           slug:  s.slug,
           name:  s.name || s.title || s.slug,
           url:   s.url  || s.site  || '',
-          status: s.status // from summary only
+          status: s.status
         };
-
         const metrics = await loadPerSite(site.slug);
         renderCard(list, site, metrics);
       }
