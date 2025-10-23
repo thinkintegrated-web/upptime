@@ -1,0 +1,68 @@
+name: Generate groups.json
+
+on:
+  push:
+    branches: [ master ]            # or "main" if that's your default
+    paths:
+      - ".upptimerc.yml"
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 2 * * *"             # optional nightly refresh
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install yaml parser
+        run: npm i js-yaml
+
+      - name: Build assets/groups.json from .upptimerc.yml
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const yaml = require('js-yaml');
+
+          const cfg = yaml.load(fs.readFileSync('.upptimerc.yml', 'utf8')) || {};
+          const out = {};
+          for (const s of (cfg.sites || [])) {
+            if (!s || !s.url) continue;
+            try {
+              const host  = new URL(s.url).host.toLowerCase().replace(/^www\./,'');
+              const group = s.group || s.alias || 'Other';
+              out[host] = group;
+            } catch {}
+          }
+          fs.mkdirSync('assets', { recursive: true });
+          fs.writeFileSync('assets/groups.json', JSON.stringify(out, null, 2) + '\n');
+          console.log('Wrote assets/groups.json with', Object.keys(out).length, 'entries');
+          NODE
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet assets/groups.json; then
+            echo "No changes.";
+          else
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add assets/groups.json
+            git commit -m "chore: update assets/groups.json from .upptimerc.yml"
+            git push
+          fi
+
+      # Tell Upptime's site workflow to rebuild now (it listens for repository_dispatch: static_site)
+      - name: Trigger Upptime site rebuild
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: static_site
