@@ -2,12 +2,12 @@ name: Generate groups.json
 
 on:
   push:
-    branches: [ master ]            # or "main" if that's your default
+    branches: [ master ]          # or 'main' if that's your default branch
     paths:
       - ".upptimerc.yml"
   workflow_dispatch: {}
   schedule:
-    - cron: "0 2 * * *"             # optional nightly refresh
+    - cron: "0 2 * * *"           # optional nightly refresh
 
 permissions:
   contents: write
@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # <-- so we can push back
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -50,12 +52,12 @@ jobs:
 
       - name: Commit if changed
         run: |
-          if git diff --quiet assets/groups.json; then
-            echo "No changes.";
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
           else
-            git config user.name  "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add assets/groups.json
             git commit -m "chore: update assets/groups.json from .upptimerc.yml"
             git push
           fi
