@@ -27,34 +27,37 @@
   </header>
 
   <section id="sites" class="sites"></section>
-  <div id="empty" class="empty">No data yet. When GitHub Pages publishes <code>history/summary.json</code> (and <code>api/</code>), this will populate.</div>
+  <div id="empty" class="empty">No data yet. When GitHub Pages publishes <code>history/summary.json</code> and <code>api/</code>, this will populate.</div>
 
   <script>
-    // ==== Auto-detect base path (works for /upptime/, /uptime/, or custom domains) ====
+    // --- auto-detect base path: works for /upptime/, /uptime/, or custom domain ---
     function detectBase() {
-      // On github.io the first path segment is the repo name: /<repo>/
       const segs = location.pathname.split("/").filter(Boolean);
-      if (location.hostname.endsWith("github.io") && segs.length) {
-        return "/" + segs[0] + "/"; // e.g., "/upptime/"
-      }
-      return "/"; // custom domain
+      if (location.hostname.endsWith("github.io") && segs.length) return "/" + segs[0] + "/"; // e.g. "/upptime/"
+      return "/";
     }
-    const BASE = detectBase();                  // e.g. "/upptime/"
+    const BASE = detectBase();
     const SUMMARY_URL = BASE + "history/summary.json";
-    const API_BASE    = BASE + "api/";          // e.g. "/upptime/api/"
+    const API_BASE    = BASE + "api/";
 
-    // Quiet JSON fetch (no console noise)
+    // Quiet fetch (no console noise)
     async function fetchJson(url) {
-      try {
-        const res = await fetch(url, { cache: "no-store" });
-        if (!res.ok) return null;
-        return await res.json();
-      } catch { return null; }
+      try { const r = await fetch(url, { cache: "no-store" }); if (!r.ok) return null; return await r.json(); }
+      catch { return null; }
     }
 
+    // helpers
     const last = (arr) => (Array.isArray(arr) && arr.length ? arr[arr.length - 1] : null);
+
+    // read response-time from either series JSON or badge JSON
     function extractResponseMs(obj) {
       if (obj == null) return null;
+      // badge style: { schemaVersion, label: "response time", message: "1195 ms" }
+      if (obj.schemaVersion && typeof obj.message === "string") {
+        const m = obj.message.match(/([\d.]+)/);
+        return m ? Number(m[1]) : null;
+      }
+      // series style
       if (typeof obj === "number") return obj;
       if (typeof obj.average === "number") return obj.average;
       if (typeof obj.median === "number") return obj.median;
@@ -65,8 +68,16 @@
       if (Array.isArray(obj) && typeof last(obj)?.value === "number") return last(obj).value;
       return null;
     }
+
+    // read uptime from either series JSON or badge JSON
     function extractUptimePct(obj) {
       if (obj == null) return null;
+      // badge style: { schemaVersion, label: "uptime", message: "99.94%" }
+      if (obj.schemaVersion && typeof obj.message === "string") {
+        const m = obj.message.match(/([\d.]+)/);
+        return m ? Number(m[1]) : null;
+      }
+      // series style
       if (typeof obj === "number") return obj;
       if (typeof obj.uptime === "number") return obj.uptime;
       if (typeof obj.overall === "number") return obj.overall;
@@ -116,10 +127,8 @@
     }
 
     async function loadPerSite(slug) {
-      // Try several files; use the first that yields a number
       const respFiles = ["response-time.json","response-time-day.json","response-time-week.json","response-time-month.json","response-time-year.json"];
       const upFiles   = ["uptime.json","uptime-day.json","uptime-week.json","uptime-month.json","uptime-year.json"];
-
       let responseMs = null, uptimePct = null;
 
       for (const f of respFiles) {
@@ -139,14 +148,13 @@
       const list = document.getElementById("sites");
       const empty = document.getElementById("empty");
 
-      // 1) Get the list + status from summary.json at the *detected* base
+      // 1) Load site list + status
       const summary = await fetchJson(SUMMARY_URL);
       if (!summary) { empty.style.display = "block"; return; }
-
       const rows = Array.isArray(summary) ? summary : (summary.sites || []);
       if (!rows.length) { empty.style.display = "block"; return; }
 
-      // 2) For each site, fetch response/uptime from /api/<slug>/… at the *detected* base
+      // 2) For each site, pull metrics from /api/<slug>/… (handles badge JSON too)
       for (const s of rows) {
         const site = {
           slug: s.slug,
