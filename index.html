@@ -15,15 +15,81 @@
     .cols-cards { grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); }
     .header { padding: .75rem 1rem; background: var(--hdr); border: 1px solid var(--br); border-radius: .5rem; font-weight: 600; }
     .card { display: grid; grid-template-columns: 1.6fr .6fr .6fr .8fr; gap: .75rem; align-items: center;
-            padding: 1rem; background: var(--card); border: 1px solid var(--br); border-radius: .75rem; }
+            margin-top: 0.5rem; border-radius: 20px 5px 5px 20px; font-size: 12px; }
     .url { display: flex; align-items: center; gap: .5rem; min-width: 0; }
     .url a { color: #1f6feb; text-decoration: none; }
     .url a:hover { text-decoration: underline; }
     .pill { padding: .2rem .5rem; border-radius: 999px; font-size: .875rem; }
     .pill.up { background: #e8f7ee; color: #207d41; }
     .pill.down { background: #fde8e8; color: #b42318; }
-    .empty { display:none; margin-top:1rem; padding:1rem; background:#fff8db; border:1px solid #ffe08a; border-radius:.5rem; }
-    img.fav { width: 13px; height: 13px; }
+    article:has(.up) {
+        background: #3e632d;
+    }
+    
+    article:has(.down) {
+        background: #611414;
+    }
+    
+    article .url img {
+        width: 40px;
+        height: auto;
+        border-radius: 100%;
+        background: #fff;
+        border: 1px solid gray;
+    }
+    
+    article {
+        text-transform: uppercase;
+        font-family: 'Hepta Slab';
+        font-weight: bold;
+        letter-spacing: 1.5px;
+    }
+    
+    article a {
+        color: inherit;
+    }
+    
+    body {
+        background: #2b2b2b;
+    }
+    
+    .url a {
+        color: #fff;
+    }
+    
+    article {
+        color: #fff;
+    }
+    
+    .group-title {
+        color: #fff;
+    padding:20px 5px 10px 10px;
+    font-family: 'Hepta Slab';
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+#headerTpl {
+    background:#202020;
+    border-radius:10px;
+}
+
+article div:nth-child(2),
+#headerTpl div:nth-child(2) {
+    text-align: center;
+}
+
+article div:nth-child(3),
+#headerTpl div:nth-child(3),
+article div:nth-child(4),
+#headerTpl div:nth-child(4){
+    text-align: right;
+}
+
+article div:nth-child(3),
+article div:nth-child(4) {
+    padding-right:10px;
+}
   </style>
 </head>
 <body>
