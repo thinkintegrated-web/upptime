@@ -33,6 +33,15 @@
 <div id="empty" class="empty">No data yet. When GitHub Pages publishes <code>history/summary.json</code> and <code>api/</code>, this will populate.</div>
 
 <script>
+
+  // Build an Upptime-like slug from a URL host, e.g. "www.example.com" -> "example-com"
+  function slugFromUrl(u) {
+    try {
+      const host = new URL(u).host.toLowerCase().replace(/^www\./, "");
+      return host.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    } catch { return null; }
+  }
+  
   // ===== Base detection =====
   function detectBase() {
     const segs = location.pathname.split("/").filter(Boolean);
@@ -54,20 +63,19 @@
   // Tiny YAML reader for just name/url/group/alias
   function parseRcYml(yml){
     const rows=[]; const lines=yml.split(/\r?\n/); let inSites=false, cur=null;
-    for(const raw of lines){
-      const line=raw.replace(/\t/g,"  ");
-      if(!inSites){ if(/^\s*sites\s*:\s*$/.test(line)) { inSites=true; } continue; }
-      if(/^\S/.test(line)) break; // left sites
-      const mItem=/^\s*-\s*/.exec(line);
-      if(mItem){ if(cur) rows.push(cur); cur={}; continue; }
-      if(!cur) continue;
-      const kv=/^\s*(name|url|group|alias)\s*:\s*(.+)\s*$/.exec(line);
-      if(kv){ const k=kv[1]; let v=kv[2].trim(); v=v.replace(/^["']|["']$/g,""); cur[k]=v; }
+    for (const raw of lines) {
+      const line = raw.replace(/\t/g, "  ");
+      if (!inSites) { if (/^\s*sites\s*:\s*$/.test(line)) inSites = true; continue; }
+      if (/^\S/.test(line)) break;                      // left 'sites:' block
+      if (/^\s*-\s*/.test(line)) { if (cur) rows.push(cur); cur = {}; continue; }
+      if (!cur) continue;
+      const kv = /^\s*(name|url|group|alias)\s*:\s*(.+)\s*$/.exec(line);
+      if (kv) { const k = kv[1]; let v = kv[2].trim().replace(/^["']|["']$/g,""); cur[k] = v; }
     }
-    if(cur) rows.push(cur);
+    if (cur) rows.push(cur);
     return rows;
   }
-
+  
   // Helpers to read badge or timeseries JSON
   const last = (a)=>Array.isArray(a)&&a.length?a[a.length-1]:null;
   function extractResponseMs(obj){
@@ -140,25 +148,29 @@
     const rows = Array.isArray(summary)? summary : (summary.sites||[]);
     if(!rows.length){ empty.style.display="block"; return; }
 
-    // B) read rc yaml to map url-> {group, alias}
+    // B) read rc yaml to map slug -> { group, alias }
     const rcText = await fetchText(RC_RAW);
-    let metaByUrl = {};
-    if(rcText){
-      for(const r of parseRcYml(rcText)){
-        if(r.url) metaByUrl[new URL(r.url).href.replace(/\/$/,"")] = { group:r.group, alias:r.alias };
+    let metaBySlug = {};
+    if (rcText) {
+      for (const r of parseRcYml(rcText)) {
+        const slug = r.url ? slugFromUrl(r.url) : null;
+        if (slug) metaBySlug[slug] = { group: r.group, alias: r.alias };
       }
     }
 
     // C) group sites
-    const groups = new Map(); // groupName -> {name, items:[]}
-    for(const s of rows){
-      const url = (s.url || s.site || "").replace(/\/$/,"");
-      const meta = metaByUrl[url] || {};
+    const groups = new Map(); // groupName -> { name, items: [] }
+    for (const s of rows) {
+      const slug = s.slug;                                  // from summary.json
+      const meta = metaBySlug[slug] || {};
       const groupName = meta.group || "Other";
-      if(!groups.has(groupName)) groups.set(groupName, { name: groupName, items: [] });
+      if (!groups.has(groupName)) groups.set(groupName, { name: groupName, items: [] });
       groups.get(groupName).items.push({
-        slug: s.slug, name: s.name || s.title || s.slug, alias: meta.alias,
-        url: s.url || s.site || "", status: s.status
+        slug,
+        name: s.name || s.title || slug,
+        alias: meta.alias,
+        url:  s.url || s.site || "",
+        status: s.status
       });
     }
 
