@@ -1,171 +1,180 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Status Dashboard</title>
-  <style>
-    :root { --bg:#fafafa; --text:#222; --card:#fff; --br:#e3e6ea; --hdr:#f6f7f9; }
-    body { font-family: system-ui, sans-serif; margin: 2rem; background: var(--bg); color: var(--text); }
-    .sites-header { display:grid; grid-template-columns:1.6fr .6fr .6fr .8fr; gap:.75rem;
-      padding:.75rem 1rem; font-weight:600; background:var(--hdr); border:1px solid var(--br);
-      border-radius:.5rem; margin:1rem 0 .75rem; }
-    .sites { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:.75rem; }
-    .site-card { display:grid; grid-template-columns:1.6fr .6fr .6fr .8fr; gap:.75rem; align-items:center;
-      padding:1rem; border:1px solid var(--br); border-radius:.75rem; background:var(--card); }
-    .site-card .url { display:flex; align-items:center; gap:.5rem; }
-    .pill { padding:.2rem .5rem; border-radius:999px; font-size:.875rem; }
-    .pill.up { background:#e8f7ee; color:#207d41; }
-    .pill.down { background:#fde8e8; color:#b42318; }
-    .empty { margin-top:1rem; padding:1rem; background:#fff8db; border:1px solid #ffe08a; border-radius:.5rem; display:none; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Status Dashboard</title>
+<style>
+  :root { --bg:#fafafa; --text:#222; --card:#fff; --br:#e3e6ea; --hdr:#f6f7f9; }
+  body { font-family: system-ui, sans-serif; margin: 2rem; background: var(--bg); color: var(--text); }
+  .group { margin: 2rem 0 0.5rem; font-size: 1.125rem; font-weight: 700; }
+  .sites-header, .sites {
+    display:grid; grid-template-columns:1.6fr .6fr .6fr .8fr; gap:.75rem;
+  }
+  .sites-header { padding:.75rem 1rem; font-weight:600; background:var(--hdr); border:1px solid var(--br); border-radius:.5rem; margin:.5rem 0 1rem; }
+  .sites      { grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); }
+  .site-card  { display:grid; grid-template-columns:1.6fr .6fr .6fr .8fr; gap:.75rem; align-items:center;
+                padding:1rem; border:1px solid var(--br); border-radius:.75rem; background:var(--card); }
+  .site-card .url { display:flex; align-items:center; gap:.5rem; }
+  .pill { padding:.2rem .5rem; border-radius:999px; font-size:.875rem; }
+  .pill.up { background:#e8f7ee; color:#207d41; }
+  .pill.down { background:#fde8e8; color:#b42318; }
+  .empty { margin-top:1rem; padding:1rem; background:#fff8db; border:1px solid #ffe08a; border-radius:.5rem; display:none; }
+</style>
 </head>
 <body>
 
-  <header class="sites-header">
-    <div>URL</div><div>Status</div><div>Response</div><div>Uptime</div>
-  </header>
+<!-- We’ll clone this header for each group -->
+<div id="headerTpl" class="sites-header" style="display:none">
+  <div>URL</div><div>Status</div><div>Response</div><div>Uptime</div>
+</div>
 
-  <section id="sites" class="sites"></section>
-  <div id="empty" class="empty">No data yet. When GitHub Pages publishes <code>history/summary.json</code> and <code>api/</code>, this will populate.</div>
+<section id="groups"></section>
+<div id="empty" class="empty">No data yet. When GitHub Pages publishes <code>history/summary.json</code> and <code>api/</code>, this will populate.</div>
 
-  <script>
-    // --- auto-detect base path: works for /upptime/, /uptime/, or custom domain ---
-    function detectBase() {
-      const segs = location.pathname.split("/").filter(Boolean);
-      if (location.hostname.endsWith("github.io") && segs.length) return "/" + segs[0] + "/"; // e.g. "/upptime/"
-      return "/";
+<script>
+  // ===== Base detection =====
+  function detectBase() {
+    const segs = location.pathname.split("/").filter(Boolean);
+    if (location.hostname.endsWith("github.io") && segs.length) return "/" + segs[0] + "/"; // e.g. /upptime/
+    return "/";
+  }
+  const BASE       = detectBase();
+  const SUMMARYURL = BASE + "history/summary.json";
+  const API_BASE   = BASE + "api/";
+
+  // Adjust these if your default branch changes
+  const OWNER="thinkintegrated-web", REPO="upptime", BRANCH="master";
+  const RC_RAW = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/.upptimerc.yml`;
+
+  // Quiet fetchers
+  async function fetchJson(url){ try{const r=await fetch(url,{cache:"no-store"}); if(!r.ok) return null; return await r.json(); }catch{return null;} }
+  async function fetchText(url){ try{const r=await fetch(url,{cache:"no-store"}); if(!r.ok) return null; return await r.text(); }catch{return null;} }
+
+  // Tiny YAML reader for just name/url/group/alias
+  function parseRcYml(yml){
+    const rows=[]; const lines=yml.split(/\r?\n/); let inSites=false, cur=null;
+    for(const raw of lines){
+      const line=raw.replace(/\t/g,"  ");
+      if(!inSites){ if(/^\s*sites\s*:\s*$/.test(line)) { inSites=true; } continue; }
+      if(/^\S/.test(line)) break; // left sites
+      const mItem=/^\s*-\s*/.exec(line);
+      if(mItem){ if(cur) rows.push(cur); cur={}; continue; }
+      if(!cur) continue;
+      const kv=/^\s*(name|url|group|alias)\s*:\s*(.+)\s*$/.exec(line);
+      if(kv){ const k=kv[1]; let v=kv[2].trim(); v=v.replace(/^["']|["']$/g,""); cur[k]=v; }
     }
-    const BASE = detectBase();
-    const SUMMARY_URL = BASE + "history/summary.json";
-    const API_BASE    = BASE + "api/";
+    if(cur) rows.push(cur);
+    return rows;
+  }
 
-    // Quiet fetch (no console noise)
-    async function fetchJson(url) {
-      try { const r = await fetch(url, { cache: "no-store" }); if (!r.ok) return null; return await r.json(); }
-      catch { return null; }
-    }
+  // Helpers to read badge or timeseries JSON
+  const last = (a)=>Array.isArray(a)&&a.length?a[a.length-1]:null;
+  function extractResponseMs(obj){
+    if(!obj) return null;
+    if(obj.schemaVersion && typeof obj.message==="string"){ const m=obj.message.match(/([\d.]+)/); return m?Number(m[1]):null; }
+    if(typeof obj==="number") return obj;
+    if(typeof obj.average==="number") return obj.average;
+    if(typeof obj.median==="number")  return obj.median;
+    if(typeof obj.last24h==="number")  return obj.last24h;
+    if(obj.daily){ const d=last(obj.daily); if(d&&typeof d.value==="number") return d.value; }
+    if(obj.weekly){const d=last(obj.weekly);if(d&&typeof d.value==="number") return d.value;}
+    if(obj.monthly){const d=last(obj.monthly);if(d&&typeof d.value==="number") return d.value;}
+    if(Array.isArray(obj)&&typeof last(obj)?.value==="number") return last(obj).value;
+    return null;
+  }
+  function extractUptimePct(obj){
+    if(!obj) return null;
+    if(obj.schemaVersion && typeof obj.message==="string"){ const m=obj.message.match(/([\d.]+)/); return m?Number(m[1]):null; }
+    if(typeof obj==="number") return obj;
+    if(typeof obj.uptime==="number") return obj.uptime;
+    if(typeof obj.overall==="number") return obj.overall;
+    if(obj.daily){ const d=last(obj.daily); if(d&&typeof d.uptime==="number") return d.uptime; }
+    if(obj.weekly){const d=last(obj.weekly);if(d&&typeof d.uptime==="number") return d.uptime;}
+    if(obj.monthly){const d=last(obj.monthly);if(d&&typeof d.uptime==="number") return d.uptime;}
+    if(Array.isArray(obj)&&typeof last(obj)?.uptime==="number") return last(obj).uptime;
+    return null;
+  }
 
-    // helpers
-    const last = (arr) => (Array.isArray(arr) && arr.length ? arr[arr.length - 1] : null);
+  function pill(isUp){ const s=document.createElement("span"); s.className="pill "+(isUp?"up":"down"); s.textContent=isUp?"Up":"Down"; return s; }
 
-    // read response-time from either series JSON or badge JSON
-    function extractResponseMs(obj) {
-      if (obj == null) return null;
-      // badge style: { schemaVersion, label: "response time", message: "1195 ms" }
-      if (obj.schemaVersion && typeof obj.message === "string") {
-        const m = obj.message.match(/([\d.]+)/);
-        return m ? Number(m[1]) : null;
+  function renderCard(listEl, site, metrics){
+    const card=document.createElement("article"); card.className="site-card";
+    // url
+    const u=document.createElement("div"); u.className="url";
+    const fav=document.createElement("img"); fav.height=13; fav.alt="";
+    const a=document.createElement("a");
+    if(site.url){ try{ fav.src="https://icons.duckduckgo.com/ip3/"+new URL(site.url).host+".ico"; }catch{} a.href=site.url; }
+    a.textContent = site.alias || site.name || site.url || site.slug || "—";
+    u.append(fav,a);
+    // status
+    const st=document.createElement("div"); st.className="status";
+    const s=String(site.status||"").toLowerCase(); if(s==="up"||s==="down") st.appendChild(pill(s==="up")); else st.textContent="—";
+    // response
+    const rt=document.createElement("div"); rt.className="response";
+    rt.textContent = (typeof metrics.responseMs==="number" && isFinite(metrics.responseMs)) ? Math.round(metrics.responseMs)+" ms" : "—";
+    // uptime
+    const up=document.createElement("div"); up.className="uptime";
+    up.textContent = (typeof metrics.uptimePct==="number" && isFinite(metrics.uptimePct)) ? metrics.uptimePct.toFixed(2)+"%" : "—";
+    card.append(u,st,rt,up);
+    listEl.appendChild(card);
+  }
+
+  async function loadPerSite(slug){
+    const respFiles=["response-time.json","response-time-day.json","response-time-week.json","response-time-month.json","response-time-year.json"];
+    const upFiles=["uptime.json","uptime-day.json","uptime-week.json","uptime-month.json","uptime-year.json"];
+    let responseMs=null, uptimePct=null;
+    for(const f of respFiles){ const j=await fetchJson(API_BASE+slug+"/"+f); const v=extractResponseMs(j); if(typeof v==="number"){responseMs=v;break;} }
+    for(const f of upFiles){ const j=await fetchJson(API_BASE+slug+"/"+f); const v=extractUptimePct(j); if(typeof v==="number"){uptimePct=v;break;} }
+    return {responseMs, uptimePct};
+  }
+
+  (async function init(){
+    const host = document.getElementById("groups");
+    const empty= document.getElementById("empty");
+    const headerTpl = document.getElementById("headerTpl");
+
+    // A) summary for list + status
+    const summary = await fetchJson(SUMMARYURL);
+    if(!summary){ empty.style.display="block"; return; }
+    const rows = Array.isArray(summary)? summary : (summary.sites||[]);
+    if(!rows.length){ empty.style.display="block"; return; }
+
+    // B) read rc yaml to map url-> {group, alias}
+    const rcText = await fetchText(RC_RAW);
+    let metaByUrl = {};
+    if(rcText){
+      for(const r of parseRcYml(rcText)){
+        if(r.url) metaByUrl[new URL(r.url).href.replace(/\/$/,"")] = { group:r.group, alias:r.alias };
       }
-      // series style
-      if (typeof obj === "number") return obj;
-      if (typeof obj.average === "number") return obj.average;
-      if (typeof obj.median === "number") return obj.median;
-      if (typeof obj.last24h === "number") return obj.last24h;
-      if (obj.daily)   { const d = last(obj.daily);   if (d && typeof d.value === "number") return d.value; }
-      if (obj.weekly)  { const d = last(obj.weekly);  if (d && typeof d.value === "number") return d.value; }
-      if (obj.monthly) { const d = last(obj.monthly); if (d && typeof d.value === "number") return d.value; }
-      if (Array.isArray(obj) && typeof last(obj)?.value === "number") return last(obj).value;
-      return null;
     }
 
-    // read uptime from either series JSON or badge JSON
-    function extractUptimePct(obj) {
-      if (obj == null) return null;
-      // badge style: { schemaVersion, label: "uptime", message: "99.94%" }
-      if (obj.schemaVersion && typeof obj.message === "string") {
-        const m = obj.message.match(/([\d.]+)/);
-        return m ? Number(m[1]) : null;
-      }
-      // series style
-      if (typeof obj === "number") return obj;
-      if (typeof obj.uptime === "number") return obj.uptime;
-      if (typeof obj.overall === "number") return obj.overall;
-      if (obj.daily)   { const d = last(obj.daily);   if (d && typeof d.uptime === "number") return d.uptime; }
-      if (obj.weekly)  { const d = last(obj.weekly);  if (d && typeof d.uptime === "number") return d.uptime; }
-      if (obj.monthly) { const d = last(obj.monthly); if (d && typeof d.uptime === "number") return d.uptime; }
-      if (Array.isArray(obj) && typeof last(obj)?.uptime === "number") return last(obj).uptime;
-      return null;
+    // C) group sites
+    const groups = new Map(); // groupName -> {name, items:[]}
+    for(const s of rows){
+      const url = (s.url || s.site || "").replace(/\/$/,"");
+      const meta = metaByUrl[url] || {};
+      const groupName = meta.group || "Other";
+      if(!groups.has(groupName)) groups.set(groupName, { name: groupName, items: [] });
+      groups.get(groupName).items.push({
+        slug: s.slug, name: s.name || s.title || s.slug, alias: meta.alias,
+        url: s.url || s.site || "", status: s.status
+      });
     }
 
-    function pill(isUp) {
-      const s = document.createElement("span");
-      s.className = "pill " + (isUp ? "up" : "down");
-      s.textContent = isUp ? "Up" : "Down";
-      return s;
-    }
+    // D) render each group section
+    for(const [,g] of groups){
+      const h2=document.createElement("h2"); h2.className="group"; h2.textContent=g.name;
+      const hdr=headerTpl.cloneNode(true); hdr.style.display="";
+      const list=document.createElement("section"); list.className="sites";
+      host.append(h2, hdr, list);
 
-    function renderCard(container, site, metrics) {
-      const el = document.createElement("article");
-      el.className = "site-card";
-
-      const url = document.createElement("div");
-      url.className = "url";
-      const fav = document.createElement("img"); fav.height = 13; fav.alt = "";
-      const a = document.createElement("a");
-      if (site.url) {
-        try { fav.src = "https://icons.duckduckgo.com/ip3/" + new URL(site.url).host + ".ico"; } catch {}
-        a.href = site.url;
-      }
-      a.textContent = site.name || site.url || site.slug || "—";
-      url.append(fav, a);
-
-      const status = document.createElement("div"); status.className = "status";
-      const s = String(site.status || "").toLowerCase();
-      if (s === "up" || s === "down") status.appendChild(pill(s === "up")); else status.textContent = "—";
-
-      const response = document.createElement("div"); response.className = "response";
-      const ms = (typeof metrics.responseMs === "number") ? Math.round(metrics.responseMs) : null;
-      response.textContent = (ms != null && isFinite(ms)) ? `${ms} ms` : "—";
-
-      const uptime = document.createElement("div"); uptime.className = "uptime";
-      const pct = (typeof metrics.uptimePct === "number") ? metrics.uptimePct : null;
-      uptime.textContent = (pct != null && isFinite(pct)) ? `${pct.toFixed(2)}%` : "—";
-
-      el.append(url, status, response, uptime);
-      container.appendChild(el);
-    }
-
-    async function loadPerSite(slug) {
-      const respFiles = ["response-time.json","response-time-day.json","response-time-week.json","response-time-month.json","response-time-year.json"];
-      const upFiles   = ["uptime.json","uptime-day.json","uptime-week.json","uptime-month.json","uptime-year.json"];
-      let responseMs = null, uptimePct = null;
-
-      for (const f of respFiles) {
-        const j = await fetchJson(API_BASE + slug + "/" + f);
-        const v = extractResponseMs(j);
-        if (typeof v === "number") { responseMs = v; break; }
-      }
-      for (const f of upFiles) {
-        const j = await fetchJson(API_BASE + slug + "/" + f);
-        const v = extractUptimePct(j);
-        if (typeof v === "number") { uptimePct = v; break; }
-      }
-      return { responseMs, uptimePct };
-    }
-
-    (async function init() {
-      const list = document.getElementById("sites");
-      const empty = document.getElementById("empty");
-
-      // 1) Load site list + status
-      const summary = await fetchJson(SUMMARY_URL);
-      if (!summary) { empty.style.display = "block"; return; }
-      const rows = Array.isArray(summary) ? summary : (summary.sites || []);
-      if (!rows.length) { empty.style.display = "block"; return; }
-
-      // 2) For each site, pull metrics from /api/<slug>/… (handles badge JSON too)
-      for (const s of rows) {
-        const site = {
-          slug: s.slug,
-          name: s.name || s.title || s.slug,
-          url:  s.url  || s.site  || "",
-          status: s.status
-        };
-        const metrics = await loadPerSite(site.slug);
+      for(const site of g.items){
+        const metrics=await loadPerSite(site.slug);
         renderCard(list, site, metrics);
       }
-    })();
-  </script>
+    }
+  })();
+</script>
 </body>
 </html>
