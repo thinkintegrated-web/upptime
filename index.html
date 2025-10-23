@@ -118,7 +118,11 @@
       const fav=document.createElement("img"); fav.className="fav"; fav.alt="";
       const a=document.createElement("a");
       if(site.url){ try{ fav.src="https://icons.duckduckgo.com/ip3/"+new URL(site.url).host+".ico"; }catch{} a.href=site.url; }
-      a.textContent=site.alias||site.name||site.url||site.slug||"—";
+      let label = site.name;
+      if (!label && site.url) {
+        try { label = new URL(site.url).host.replace(/^www\./, ""); } catch {}
+      }
+      a.textContent = label || site.slug || "—";
       url.append(fav,a);
 
       const status=document.createElement("div");
@@ -165,7 +169,7 @@
       if (groupByHost && typeof groupByHost === "object") {
         // Use public JSON directly
         for (const [host, group] of Object.entries(groupByHost)) {
-          metaByHost[host.toLowerCase()] = { group, alias: group };
+          metaByHost[host.toLowerCase()] = { group }; // no alias here
         }
       } else {
         // Fallback: raw .upptimerc.yml (works if repo is public)
@@ -193,10 +197,9 @@
         if(!groups.has(groupName)) groups.set(groupName,{name:groupName,items:[]});
         groups.get(groupName).items.push({
           slug,
-          name:s.name||s.title||slug,
-          alias:meta.alias,
-          url:s.url||s.site||"",
-          status:s.status
+          name: s.name || s.title || slug,
+          url:  s.url || s.site || "",
+          status: s.status
         });
       }
 
