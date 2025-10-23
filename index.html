@@ -17,7 +17,7 @@
     .pill { padding:.2rem .5rem; border-radius:999px; font-size:.875rem; }
     .pill.up { background:#e8f7ee; color:#207d41; }
     .pill.down { background:#fde8e8; color:#b42318; }
-    .empty { margin-top:1rem; padding:1rem; background:#fff8db; border:1px solid #ffe08a; border-radius:.5rem; }
+    .empty { margin-top:1rem; padding:1rem; background:#fff8db; border:1px solid #ffe08a; border-radius:.5rem; display:none; }
   </style>
 </head>
 <body>
@@ -27,74 +27,136 @@
   </header>
 
   <section id="sites" class="sites"></section>
-  <div id="empty" class="empty" style="display:none">
-    No public summary found yet. Once GitHub Pages publishes <code>history/summary.json</code>, this dashboard will populate automatically.
-  </div>
+  <div id="empty" class="empty">No data yet. When GitHub Pages publishes <code>history/summary.json</code> (and <code>api/</code>), this will populate.</div>
 
   <script>
-    // Resolve summary.json RELATIVE to wherever this page is served (handles /, /uptime/, etc.)
-    const summaryUrl = new URL('history/summary.json', location.href).href;
+    // ==== Auto-detect base path (works for /upptime/, /uptime/, or custom domains) ====
+    function detectBase() {
+      // On github.io the first path segment is the repo name: /<repo>/
+      const segs = location.pathname.split("/").filter(Boolean);
+      if (location.hostname.endsWith("github.io") && segs.length) {
+        return "/" + segs[0] + "/"; // e.g., "/upptime/"
+      }
+      return "/"; // custom domain
+    }
+    const BASE = detectBase();                  // e.g. "/upptime/"
+    const SUMMARY_URL = BASE + "history/summary.json";
+    const API_BASE    = BASE + "api/";          // e.g. "/upptime/api/"
 
-    // Quiet fetch: returns null on failure (no 404 noise)
-    async function fetchJsonQuiet(url) {
+    // Quiet JSON fetch (no console noise)
+    async function fetchJson(url) {
       try {
-        const res = await fetch(url, { cache: 'no-store' });
+        const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) return null;
         return await res.json();
       } catch { return null; }
     }
 
+    const last = (arr) => (Array.isArray(arr) && arr.length ? arr[arr.length - 1] : null);
+    function extractResponseMs(obj) {
+      if (obj == null) return null;
+      if (typeof obj === "number") return obj;
+      if (typeof obj.average === "number") return obj.average;
+      if (typeof obj.median === "number") return obj.median;
+      if (typeof obj.last24h === "number") return obj.last24h;
+      if (obj.daily)   { const d = last(obj.daily);   if (d && typeof d.value === "number") return d.value; }
+      if (obj.weekly)  { const d = last(obj.weekly);  if (d && typeof d.value === "number") return d.value; }
+      if (obj.monthly) { const d = last(obj.monthly); if (d && typeof d.value === "number") return d.value; }
+      if (Array.isArray(obj) && typeof last(obj)?.value === "number") return last(obj).value;
+      return null;
+    }
+    function extractUptimePct(obj) {
+      if (obj == null) return null;
+      if (typeof obj === "number") return obj;
+      if (typeof obj.uptime === "number") return obj.uptime;
+      if (typeof obj.overall === "number") return obj.overall;
+      if (obj.daily)   { const d = last(obj.daily);   if (d && typeof d.uptime === "number") return d.uptime; }
+      if (obj.weekly)  { const d = last(obj.weekly);  if (d && typeof d.uptime === "number") return d.uptime; }
+      if (obj.monthly) { const d = last(obj.monthly); if (d && typeof d.uptime === "number") return d.uptime; }
+      if (Array.isArray(obj) && typeof last(obj)?.uptime === "number") return last(obj).uptime;
+      return null;
+    }
+
     function pill(isUp) {
-      const s = document.createElement('span');
-      s.className = 'pill ' + (isUp ? 'up' : 'down');
-      s.textContent = isUp ? 'Up' : 'Down';
+      const s = document.createElement("span");
+      s.className = "pill " + (isUp ? "up" : "down");
+      s.textContent = isUp ? "Up" : "Down";
       return s;
     }
 
-    function renderCard(container, row) {
-      const el = document.createElement('article');
-      el.className = 'site-card';
+    function renderCard(container, site, metrics) {
+      const el = document.createElement("article");
+      el.className = "site-card";
 
-      const url = document.createElement('div');
-      url.className = 'url';
-      const fav = document.createElement('img'); fav.height = 13; fav.alt = '';
-      const link = document.createElement('a');
-      const href = row.url || row.site || '';
-      if (href) {
-        try { fav.src = 'https://icons.duckduckgo.com/ip3/' + new URL(href).host + '.ico'; } catch {}
-        link.href = href;
+      const url = document.createElement("div");
+      url.className = "url";
+      const fav = document.createElement("img"); fav.height = 13; fav.alt = "";
+      const a = document.createElement("a");
+      if (site.url) {
+        try { fav.src = "https://icons.duckduckgo.com/ip3/" + new URL(site.url).host + ".ico"; } catch {}
+        a.href = site.url;
       }
-      link.textContent = row.name || row.title || row.slug || href || '—';
-      url.append(fav, link);
+      a.textContent = site.name || site.url || site.slug || "—";
+      url.append(fav, a);
 
-      const status = document.createElement('div'); status.className = 'status';
-      const s = String(row.status || '').toLowerCase();
-      if (s === 'up' || s === 'down') status.appendChild(pill(s === 'up')); else status.textContent = '—';
+      const status = document.createElement("div"); status.className = "status";
+      const s = String(site.status || "").toLowerCase();
+      if (s === "up" || s === "down") status.appendChild(pill(s === "up")); else status.textContent = "—";
 
-      const response = document.createElement('div'); response.className = 'response';
-      const r = typeof row.responseTime === 'number' ? Math.round(row.responseTime) : null;
-      response.textContent = (r != null && isFinite(r)) ? `${r} ms` : '—';
+      const response = document.createElement("div"); response.className = "response";
+      const ms = (typeof metrics.responseMs === "number") ? Math.round(metrics.responseMs) : null;
+      response.textContent = (ms != null && isFinite(ms)) ? `${ms} ms` : "—";
 
-      const uptime = document.createElement('div'); uptime.className = 'uptime';
-      const u = typeof row.uptime === 'number' ? row.uptime : null;
-      uptime.textContent = (u != null && isFinite(u)) ? `${u.toFixed(2)}%` : '—';
+      const uptime = document.createElement("div"); uptime.className = "uptime";
+      const pct = (typeof metrics.uptimePct === "number") ? metrics.uptimePct : null;
+      uptime.textContent = (pct != null && isFinite(pct)) ? `${pct.toFixed(2)}%` : "—";
 
       el.append(url, status, response, uptime);
       container.appendChild(el);
     }
 
-    (async function init() {
-      const list = document.getElementById('sites');
-      const empty = document.getElementById('empty');
+    async function loadPerSite(slug) {
+      // Try several files; use the first that yields a number
+      const respFiles = ["response-time.json","response-time-day.json","response-time-week.json","response-time-month.json","response-time-year.json"];
+      const upFiles   = ["uptime.json","uptime-day.json","uptime-week.json","uptime-month.json","uptime-year.json"];
 
-      // Only one fetch to a known public path; no raw/github-api calls = no 404 spam
-      const summary = await fetchJsonQuiet(summaryUrl);
-      if (!summary) { empty.style.display = 'block'; return; }
+      let responseMs = null, uptimePct = null;
+
+      for (const f of respFiles) {
+        const j = await fetchJson(API_BASE + slug + "/" + f);
+        const v = extractResponseMs(j);
+        if (typeof v === "number") { responseMs = v; break; }
+      }
+      for (const f of upFiles) {
+        const j = await fetchJson(API_BASE + slug + "/" + f);
+        const v = extractUptimePct(j);
+        if (typeof v === "number") { uptimePct = v; break; }
+      }
+      return { responseMs, uptimePct };
+    }
+
+    (async function init() {
+      const list = document.getElementById("sites");
+      const empty = document.getElementById("empty");
+
+      // 1) Get the list + status from summary.json at the *detected* base
+      const summary = await fetchJson(SUMMARY_URL);
+      if (!summary) { empty.style.display = "block"; return; }
 
       const rows = Array.isArray(summary) ? summary : (summary.sites || []);
-      if (!rows.length) { empty.style.display = 'block'; return; }
+      if (!rows.length) { empty.style.display = "block"; return; }
 
-      rows.forEach(renderCard.bind(null, list));
+      // 2) For each site, fetch response/uptime from /api/<slug>/… at the *detected* base
+      for (const s of rows) {
+        const site = {
+          slug: s.slug,
+          name: s.name || s.title || s.slug,
+          url:  s.url  || s.site  || "",
+          status: s.status
+        };
+        const metrics = await loadPerSite(site.slug);
+        renderCard(list, site, metrics);
+      }
     })();
   </script>
 </body>
