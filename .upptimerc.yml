@@ -23,8 +23,8 @@ sites:
     
   - name: cshpinnovation.com
     url: https://www.cshpinnovation.com
-    group: server.wsoaonline.com
-    alias: server.wsoaonline.com
+    group: server3.wsoaonline.com
+    alias: server3.wsoaonline.com
     
   - name: destinyfamilyoffice.com
     url: https://www.destinyfamilyoffice.com
