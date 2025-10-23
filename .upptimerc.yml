@@ -4,10 +4,6 @@ repo: upptime
 sites:
   - name: bhpcchamber.org
     url: https://www.bhpchamber.org
-  - name: blacktipit.com
-    url: https://www.blacktipit.com
-  - name: ciaimaging.com
-    url: https://www.ciaimaging.com
   - name: congdonyards.com
     url: https://www.congdonyards.com
   - name: crittercontroldallas.com
@@ -20,8 +16,6 @@ sites:
     url: https://www.eventsatcongdonyards.com
   - name: integralandcompany.com
     url: https://www.integralandcompany.com
-  - name: invernessmedicalimaging.com
-    url: https://www.invernessmedicalimaging.com
   - name: jobspartnership.org
     url: https://www.jobspartnership.org
   - name: matthiaspw.com
@@ -30,8 +24,6 @@ sites:
     url: https://msgrouponline.com
   - name: nicholswealth.com
     url: https://www.nicholswealth.com
-  - name: orangeparkimaging.com
-    url: https://www.orangeparkimaging.com
   - name: orlandoballet.org
     url: https://www.orlandoballet.org
   - name: semiconductorengine.org
