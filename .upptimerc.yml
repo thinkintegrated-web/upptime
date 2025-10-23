@@ -6,114 +6,166 @@ sites:
 # ===============================
 # Production - server.wsoaonline.com
 # ===============================
-  - name: bhpcchamber.org
+  - name: bhpchamber.org
     url: https://www.bhpchamber.org
+    group: server.wsoaonline.com
   - name: congdonyards.com
     url: https://www.congdonyards.com
+    group: server.wsoaonline.com
   - name: crittercontroldallas.com
     url: https://www.crittercontroldallas.com
+    group: server.wsoaonline.com
   - name: cshpinnovation.com
     url: https://www.cshpinnovation.com
+    group: server.wsoaonline.com
   - name: destinyfamilyoffice.com
     url: https://www.destinyfamilyoffice.com
+    group: server.wsoaonline.com
   - name: eventsatcongdonyards.com
     url: https://www.eventsatcongdonyards.com
+    group: server.wsoaonline.com
   - name: integralandcompany.com
     url: https://www.integralandcompany.com
+    group: server.wsoaonline.com
   - name: jobspartnership.org
     url: https://www.jobspartnership.org
+    group: server.wsoaonline.com
   - name: matthiaspw.com
     url: https://www.matthiaspw.com
+    group: server.wsoaonline.com
   - name: msgrouponline.com
     url: https://msgrouponline.com
+    group: server.wsoaonline.com
   - name: nicholswealth.com
     url: https://www.nicholswealth.com
+    group: server.wsoaonline.com
   - name: orlandoballet.org
     url: https://www.orlandoballet.org
+    group: server.wsoaonline.com
   - name: semiconductorengine.org
     url: https://www.semiconductorengine.org
+    group: server.wsoaonline.com
   - name: starterstudio.org
     url: https://www.starterstudio.org
+    group: server.wsoaonline.com
   - name: cableelectrical.com
     url: https://www.cableelectrical.com
+    group: server.wsoaonline.com
   - name: unlimitedwelding.com
     url: https://www.unlimitedwelding.com
+    group: server.wsoaonline.com
 
 # ===============================
 # Rosen Hotels - server2.wsoaonline.com
 # ===============================
   - name: 3nineorlando.com
     url: https://www.3nineorlando.com
+    group: server2.wsoaonline.com
   - name: amr-foundation.com
     url: https://www.amr-foundation.com
+    group: server2.wsoaonline.com
   - name: askrosen.com
     url: https://www.askrosen.com
+    group: server2.wsoaonline.com
   - name: calabellarestaurant.com
     url: https://www.calabellarestaurant.com
+    group: server2.wsoaonline.com
   - name: evergladesrestaurant.com
     url: https://www.evergladesrestaurant.com
+    group: server2.wsoaonline.com
   - name: fitdeputy.com
     url: https://www.fitdeputy.com
+    group: server2.wsoaonline.com
   - name: harryspoolside.com
     url: https://www.harryspoolside.com
+    group: server2.wsoaonline.com
   - name: jacksplacerestaurant.com
     url: https://www.jacksplacerestaurant.com
+    group: server2.wsoaonline.com
   - name: landrememberedrestaurant.com
     url: https://www.landrememberedrestaurant.com
+    group: server2.wsoaonline.com
   - name: orlandohotels4less.com
     url: https://www.orlandohotels4less.com
+    group: server2.wsoaonline.com
   - name: pinecrestprogram.com
     url: https://www.pinecrestprogram.com
+    group: server2.wsoaonline.com
   - name: repo2.rosenhotels.com
     url: https://repo2.rosenhotels.com
+    group: server2.wsoaonline.com
   - name: rfp.rosenhotels.com
     url: https://rfp.rosenhotels.com
+    group: server2.wsoaonline.com
   - name: rosen50.com
     url: https://www.rosen50.com
+    group: server2.wsoaonline.com
   - name: rosenaquatic.com
     url: https://www.rosenaquatic.com
+    group: server2.wsoaonline.com
   - name: rosenbellavista.com
     url: https://www.rosenbellavista.com
+    group: server2.wsoaonline.com
   - name: rosencare.com
     url: https://www.rosencare.com
+    group: server2.wsoaonline.com
   - name: rosencentre.com
     url: https://www.rosencentre.com
+    group: server2.wsoaonline.com
   - name: rosengivesback.com
     url: https://www.rosengivesback.com
+    group: server2.wsoaonline.com
   - name: rosenhotels.com
     url: https://www.rosenhotels.com
+    group: server2.wsoaonline.com
   - name: rosenmedicalcenter.com
     url: https://www.rosenmedicalcenter.com
+    group: server2.wsoaonline.com
   - name: rosenplaza.com
     url: https://www.rosenplaza.com
+    group: server2.wsoaonline.com
   - name: rosenpreschool.com
     url: https://www.rosenpreschool.com
+    group: server2.wsoaonline.com
   - name: rosenrevealed.com
     url: https://www.rosenrevealed.com
+    group: server2.wsoaonline.com
   - name: rosenshinglecreek.com
     url: https://www.rosenshinglecreek.com
+    group: server2.wsoaonline.com
   - name: rosensure.com
     url: https://www.rosensure.com
+    group: server2.wsoaonline.com
   - name: rosenweddings.com
     url: https://www.rosenweddings.com
+    group: server2.wsoaonline.com
   - name: shinglecreekgolf.com
     url: https://www.shinglecreekgolf.com
+    group: server2.wsoaonline.com
   - name: spaatrosencentre.com
     url: https://www.spaatrosencentre.com
+    group: server2.wsoaonline.com
   - name: spaatshinglecreek.com
     url: https://www.spaatshinglecreek.com
+    group: server2.wsoaonline.com
   - name: wifi.rosencentre.com
     url: https://wifi.rosencentre.com
+    group: server2.wsoaonline.com
   - name: wifi.roseninn6327.com
     url: https://wifi.roseninn6327.com
+    group: server2.wsoaonline.com
   - name: wifi.roseninn7600.com
     url: https://wifi.roseninn7600.com
+    group: server2.wsoaonline.com
   - name: wifi.roseninn9000.com
     url: https://wifi.roseninn9000.com
+    group: server2.wsoaonline.com
   - name: wifi.rosenplaza.com
     url: https://wifi.rosenplaza.com
+    group: server2.wsoaonline.com
   - name: wifi.rosenshinglecreek.com
     url: https://wifi.rosenshinglecreek.com
+    group: server2.wsoaonline.com
 
 
 status-website:
