@@ -50,10 +50,6 @@ sites:
     url: https://www.askrosen.com
   - name: calabellarestaurant.com
     url: https://www.calabellarestaurant.com
-  - name: creative.rosenhotels.com
-    url: https://creative.rosenhotels.com
-  - name: eblast.rosenhotels.com
-    url: https://eblast.rosenhotels.com
   - name: evergladesrestaurant.com
     url: https://www.evergladesrestaurant.com
   - name: fitdeputy.com
@@ -68,8 +64,6 @@ sites:
     url: https://www.orlandohotels4less.com
   - name: pinecrestprogram.com
     url: https://www.pinecrestprogram.com
-  - name: promos.evergladesrestaurant.com
-    url: https://promos.evergladesrestaurant.com
   - name: repo2.rosenhotels.com
     url: https://repo2.rosenhotels.com
   - name: rfp.rosenhotels.com
