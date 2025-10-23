@@ -8,18 +8,22 @@ sites:
 # ===============================
   - name: bhpchamber.org
     url: https://www.bhpchamber.org
+    group: server.wsoaonline.com
     alias: server.wsoaonline.com
     
   - name: congdonyards.com
     url: https://www.congdonyards.com
+    group: server.wsoaonline.com
     alias: server.wsoaonline.com
     
   - name: crittercontroldallas.com
     url: https://www.crittercontroldallas.com
+    group: server.wsoaonline.com
     alias: server.wsoaonline.com
     
   - name: cshpinnovation.com
     url: https://www.cshpinnovation.com
+    group: server.wsoaonline.com
     alias: server.wsoaonline.com
     
   - name: destinyfamilyoffice.com
@@ -75,26 +79,32 @@ sites:
 # ===============================
   - name: 3nineorlando.com
     url: https://www.3nineorlando.com
+    group: server2.wsoaonline.com
     alias: server2.wsoaonline.com
     
   - name: amr-foundation.com
     url: https://www.amr-foundation.com
+    group: server2.wsoaonline.com
     alias: server2.wsoaonline.com
     
   - name: askrosen.com
     url: https://www.askrosen.com
+    group: server2.wsoaonline.com
     alias: server2.wsoaonline.com
     
   - name: calabellarestaurant.com
     url: https://www.calabellarestaurant.com
+    group: server2.wsoaonline.com
     alias: server2.wsoaonline.com
     
   - name: evergladesrestaurant.com
     url: https://www.evergladesrestaurant.com
+    group: server2.wsoaonline.com
     alias: server2.wsoaonline.com
     
   - name: fitdeputy.com
     url: https://www.fitdeputy.com
+    group: server2.wsoaonline.com
     alias: server2.wsoaonline.com
     
   - name: harryspoolside.com
