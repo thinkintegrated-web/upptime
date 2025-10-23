@@ -1,192 +1,243 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Status Dashboard</title>
-<style>
-  :root { --bg:#fafafa; --text:#222; --card:#fff; --br:#e3e6ea; --hdr:#f6f7f9; }
-  body { font-family: system-ui, sans-serif; margin: 2rem; background: var(--bg); color: var(--text); }
-  .group { margin: 2rem 0 0.5rem; font-size: 1.125rem; font-weight: 700; }
-  .sites-header, .sites {
-    display:grid; grid-template-columns:1.6fr .6fr .6fr .8fr; gap:.75rem;
-  }
-  .sites-header { padding:.75rem 1rem; font-weight:600; background:var(--hdr); border:1px solid var(--br); border-radius:.5rem; margin:.5rem 0 1rem; }
-  .sites      { grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); }
-  .site-card  { display:grid; grid-template-columns:1.6fr .6fr .6fr .8fr; gap:.75rem; align-items:center;
-                padding:1rem; border:1px solid var(--br); border-radius:.75rem; background:var(--card); }
-  .site-card .url { display:flex; align-items:center; gap:.5rem; }
-  .pill { padding:.2rem .5rem; border-radius:999px; font-size:.875rem; }
-  .pill.up { background:#e8f7ee; color:#207d41; }
-  .pill.down { background:#fde8e8; color:#b42318; }
-  .empty { margin-top:1rem; padding:1rem; background:#fff8db; border:1px solid #ffe08a; border-radius:.5rem; display:none; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Think Integrated Upptime</title>
+  <style>
+    :root { --bg:#fafafa; --text:#222; --card:#fff; --br:#e3e6ea; --hdr:#f6f7f9; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; background: var(--bg); color: var(--text); }
+    h1 { margin: 0 0 1rem; font-size: 1.5rem; }
+    .group-title { margin: 2rem 0 .5rem; font-size: 1.125rem; font-weight: 700; }
+    .grid { display: grid; gap: .75rem; }
+    .cols-4 { grid-template-columns: 1.6fr .6fr .6fr .8fr; }
+    .cols-cards { grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); }
+    .header { padding: .75rem 1rem; background: var(--hdr); border: 1px solid var(--br); border-radius: .5rem; font-weight: 600; }
+    .card { display: grid; grid-template-columns: 1.6fr .6fr .6fr .8fr; gap: .75rem; align-items: center;
+            padding: 1rem; background: var(--card); border: 1px solid var(--br); border-radius: .75rem; }
+    .url { display: flex; align-items: center; gap: .5rem; min-width: 0; }
+    .url a { color: #1f6feb; text-decoration: none; }
+    .url a:hover { text-decoration: underline; }
+    .pill { padding: .2rem .5rem; border-radius: 999px; font-size: .875rem; }
+    .pill.up { background: #e8f7ee; color: #207d41; }
+    .pill.down { background: #fde8e8; color: #b42318; }
+    .muted { color: #6b7280; }
+    .empty { display:none; margin-top:1rem; padding:1rem; background:#fff8db; border:1px solid #ffe08a; border-radius:.5rem; }
+    img.fav { width: 13px; height: 13px; }
+  </style>
 </head>
 <body>
 
-<!-- We’ll clone this header for each group -->
-<div id="headerTpl" class="sites-header" style="display:none">
-  <div>URL</div><div>Status</div><div>Response</div><div>Uptime</div>
-</div>
+  <h1>Think Integrated Upptime</h1>
 
-<section id="groups"></section>
-<div id="empty" class="empty">No data yet. When GitHub Pages publishes <code>history/summary.json</code> and <code>api/</code>, this will populate.</div>
+  <!-- Container for all grouped sections -->
+  <div id="groups"></div>
 
-<script>
+  <!-- Per-group header template -->
+  <div id="headerTpl" class="grid cols-4 header" style="display:none">
+    <div>URL</div><div>Status</div><div>Response</div><div>Uptime</div>
+  </div>
 
-  // Build an Upptime-like slug from a URL host, e.g. "www.example.com" -> "example-com"
-  function slugFromUrl(u) {
-    try {
-      const host = new URL(u).host.toLowerCase().replace(/^www\./, "");
-      return host.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    } catch { return null; }
-  }
-  
-  // ===== Base detection =====
-  function detectBase() {
-    const segs = location.pathname.split("/").filter(Boolean);
-    if (location.hostname.endsWith("github.io") && segs.length) return "/" + segs[0] + "/"; // e.g. /upptime/
-    return "/";
-  }
-  const BASE       = detectBase();
-  const SUMMARYURL = BASE + "history/summary.json";
-  const API_BASE   = BASE + "api/";
+  <div id="empty" class="empty">No data yet. Once GitHub Pages publishes <code>history/summary.json</code> and <code>api/</code>, this will populate automatically.</div>
 
-  // Adjust these if your default branch changes
-  const OWNER="thinkintegrated-web", REPO="upptime", BRANCH="master";
-  const RC_RAW = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/.upptimerc.yml`;
-
-  // Quiet fetchers
-  async function fetchJson(url){ try{const r=await fetch(url,{cache:"no-store"}); if(!r.ok) return null; return await r.json(); }catch{return null;} }
-  async function fetchText(url){ try{const r=await fetch(url,{cache:"no-store"}); if(!r.ok) return null; return await r.text(); }catch{return null;} }
-
-  // Tiny YAML reader for just name/url/group/alias
-  function parseRcYml(yml){
-    const rows=[]; const lines=yml.split(/\r?\n/); let inSites=false, cur=null;
-    for (const raw of lines) {
-      const line = raw.replace(/\t/g, "  ");
-      if (!inSites) { if (/^\s*sites\s*:\s*$/.test(line)) inSites = true; continue; }
-      if (/^\S/.test(line)) break;                      // left 'sites:' block
-      if (/^\s*-\s*/.test(line)) { if (cur) rows.push(cur); cur = {}; continue; }
-      if (!cur) continue;
-      const kv = /^\s*(name|url|group|alias)\s*:\s*(.+)\s*$/.exec(line);
-      if (kv) { const k = kv[1]; let v = kv[2].trim().replace(/^["']|["']$/g,""); cur[k] = v; }
+  <script>
+    /* -------------------- Base + repo config -------------------- */
+    function detectBase() {
+      const segs = location.pathname.split("/").filter(Boolean);
+      if (location.hostname.endsWith("github.io") && segs.length) return "/" + segs[0] + "/"; // e.g. /upptime/
+      return "/";
     }
-    if (cur) rows.push(cur);
-    return rows;
-  }
-  
-  // Helpers to read badge or timeseries JSON
-  const last = (a)=>Array.isArray(a)&&a.length?a[a.length-1]:null;
-  function extractResponseMs(obj){
-    if(!obj) return null;
-    if(obj.schemaVersion && typeof obj.message==="string"){ const m=obj.message.match(/([\d.]+)/); return m?Number(m[1]):null; }
-    if(typeof obj==="number") return obj;
-    if(typeof obj.average==="number") return obj.average;
-    if(typeof obj.median==="number")  return obj.median;
-    if(typeof obj.last24h==="number")  return obj.last24h;
-    if(obj.daily){ const d=last(obj.daily); if(d&&typeof d.value==="number") return d.value; }
-    if(obj.weekly){const d=last(obj.weekly);if(d&&typeof d.value==="number") return d.value;}
-    if(obj.monthly){const d=last(obj.monthly);if(d&&typeof d.value==="number") return d.value;}
-    if(Array.isArray(obj)&&typeof last(obj)?.value==="number") return last(obj).value;
-    return null;
-  }
-  function extractUptimePct(obj){
-    if(!obj) return null;
-    if(obj.schemaVersion && typeof obj.message==="string"){ const m=obj.message.match(/([\d.]+)/); return m?Number(m[1]):null; }
-    if(typeof obj==="number") return obj;
-    if(typeof obj.uptime==="number") return obj.uptime;
-    if(typeof obj.overall==="number") return obj.overall;
-    if(obj.daily){ const d=last(obj.daily); if(d&&typeof d.uptime==="number") return d.uptime; }
-    if(obj.weekly){const d=last(obj.weekly);if(d&&typeof d.uptime==="number") return d.uptime;}
-    if(obj.monthly){const d=last(obj.monthly);if(d&&typeof d.uptime==="number") return d.uptime;}
-    if(Array.isArray(obj)&&typeof last(obj)?.uptime==="number") return last(obj).uptime;
-    return null;
-  }
+    const BASE = detectBase();                       // e.g. "/upptime/"
+    const SUMMARY_URL = BASE + "history/summary.json";
+    const API_BASE    = BASE + "api/";
 
-  function pill(isUp){ const s=document.createElement("span"); s.className="pill "+(isUp?"up":"down"); s.textContent=isUp?"Up":"Down"; return s; }
+    // Raw link to .upptimerc.yml (adjust branch if you ever switch to main)
+    const OWNER="thinkintegrated-web", REPO="upptime", BRANCH="master";
+    const RC_RAW = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/.upptimerc.yml`;
 
-  function renderCard(listEl, site, metrics){
-    const card=document.createElement("article"); card.className="site-card";
-    // url
-    const u=document.createElement("div"); u.className="url";
-    const fav=document.createElement("img"); fav.height=13; fav.alt="";
-    const a=document.createElement("a");
-    if(site.url){ try{ fav.src="https://icons.duckduckgo.com/ip3/"+new URL(site.url).host+".ico"; }catch{} a.href=site.url; }
-    a.textContent = site.alias || site.name || site.url || site.slug || "—";
-    u.append(fav,a);
-    // status
-    const st=document.createElement("div"); st.className="status";
-    const s=String(site.status||"").toLowerCase(); if(s==="up"||s==="down") st.appendChild(pill(s==="up")); else st.textContent="—";
-    // response
-    const rt=document.createElement("div"); rt.className="response";
-    rt.textContent = (typeof metrics.responseMs==="number" && isFinite(metrics.responseMs)) ? Math.round(metrics.responseMs)+" ms" : "—";
-    // uptime
-    const up=document.createElement("div"); up.className="uptime";
-    up.textContent = (typeof metrics.uptimePct==="number" && isFinite(metrics.uptimePct)) ? metrics.uptimePct.toFixed(2)+"%" : "—";
-    card.append(u,st,rt,up);
-    listEl.appendChild(card);
-  }
+    /* -------------------- Fetch helpers -------------------- */
+    async function fetchJson(url){ try{ const r=await fetch(url,{cache:"no-store"}); if(!r.ok) return null; return await r.json(); }catch{return null;} }
+    async function fetchText(url){ try{ const r=await fetch(url,{cache:"no-store"}); if(!r.ok) return null; return await r.text(); }catch{return null;} }
 
-  async function loadPerSite(slug){
-    const respFiles=["response-time.json","response-time-day.json","response-time-week.json","response-time-month.json","response-time-year.json"];
-    const upFiles=["uptime.json","uptime-day.json","uptime-week.json","uptime-month.json","uptime-year.json"];
-    let responseMs=null, uptimePct=null;
-    for(const f of respFiles){ const j=await fetchJson(API_BASE+slug+"/"+f); const v=extractResponseMs(j); if(typeof v==="number"){responseMs=v;break;} }
-    for(const f of upFiles){ const j=await fetchJson(API_BASE+slug+"/"+f); const v=extractUptimePct(j); if(typeof v==="number"){uptimePct=v;break;} }
-    return {responseMs, uptimePct};
-  }
+    /* -------------------- Slug/host helpers -------------------- */
+    function getHost(u){ try{ return new URL(u).host.toLowerCase().replace(/^www\./,""); }catch{ return null; } }
+    function slugFromUrl(u){
+      const h = getHost(u);
+      return h ? h.replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"") : null;
+    }
 
-  (async function init(){
-    const host = document.getElementById("groups");
-    const empty= document.getElementById("empty");
-    const headerTpl = document.getElementById("headerTpl");
-
-    // A) summary for list + status
-    const summary = await fetchJson(SUMMARYURL);
-    if(!summary){ empty.style.display="block"; return; }
-    const rows = Array.isArray(summary)? summary : (summary.sites||[]);
-    if(!rows.length){ empty.style.display="block"; return; }
-
-    // B) read rc yaml to map slug -> { group, alias }
-    const rcText = await fetchText(RC_RAW);
-    let metaBySlug = {};
-    if (rcText) {
-      for (const r of parseRcYml(rcText)) {
-        const slug = r.url ? slugFromUrl(r.url) : null;
-        if (slug) metaBySlug[slug] = { group: r.group, alias: r.alias };
+    /* -------------------- .upptimerc.yml parser -------------------- */
+    function parseRcYml(yml){
+      const rows=[]; const lines=yml.split(/\r?\n/);
+      let inSites=false, cur=null;
+      for (const raw of lines){
+        const line = raw.replace(/\t/g,"  ");
+        if (!inSites){ if (/^\s*sites\s*:\s*$/.test(line)) inSites = true; continue; }
+        if (/^\S/.test(line)) break; // left the sites block
+        if (/^\s*-\s*/.test(line)){ if(cur) rows.push(cur); cur={}; continue; }
+        if (!cur) continue;
+        const m = /^\s*(name|url|group|alias)\s*:\s*(.+)\s*$/.exec(line);
+        if (m){ const k=m[1]; let v=m[2].trim().replace(/^["']|["']$/g,""); cur[k]=v; }
       }
+      if (cur) rows.push(cur);
+      return rows;
     }
 
-    // C) group sites
-    const groups = new Map(); // groupName -> { name, items: [] }
-    for (const s of rows) {
-      const slug = s.slug;                                  // from summary.json
-      const meta = metaBySlug[slug] || {};
-      const groupName = meta.group || "Other";
-      if (!groups.has(groupName)) groups.set(groupName, { name: groupName, items: [] });
-      groups.get(groupName).items.push({
-        slug,
-        name: s.name || s.title || slug,
-        alias: meta.alias,
-        url:  s.url || s.site || "",
-        status: s.status
-      });
+    /* -------------------- Metric extractors (badge or timeseries) -------------------- */
+    const last = (a)=>Array.isArray(a)&&a.length?a[a.length-1]:null;
+
+    function extractResponseMs(obj){
+      if (!obj) return null;
+      // badge JSON: { schemaVersion, label: "response time", message: "1195 ms" }
+      if (obj.schemaVersion && typeof obj.message === "string"){ const m=obj.message.match(/([\d.]+)/); return m?Number(m[1]):null; }
+      // timeseries JSON
+      if (typeof obj === "number") return obj;
+      if (typeof obj.average === "number") return obj.average;
+      if (typeof obj.median  === "number") return obj.median;
+      if (typeof obj.last24h === "number") return obj.last24h;
+      if (obj.daily){   const d=last(obj.daily);   if (d && typeof d.value === "number") return d.value; }
+      if (obj.weekly){  const d=last(obj.weekly);  if (d && typeof d.value === "number") return d.value; }
+      if (obj.monthly){ const d=last(obj.monthly); if (d && typeof d.value === "number") return d.value; }
+      if (Array.isArray(obj) && typeof last(obj)?.value === "number") return last(obj).value;
+      return null;
     }
 
-    // D) render each group section
-    for(const [,g] of groups){
-      const h2=document.createElement("h2"); h2.className="group"; h2.textContent=g.name;
-      const hdr=headerTpl.cloneNode(true); hdr.style.display="";
-      const list=document.createElement("section"); list.className="sites";
-      host.append(h2, hdr, list);
+    function extractUptimePct(obj){
+      if (!obj) return null;
+      // badge JSON: { schemaVersion, label: "uptime", message: "99.94%" }
+      if (obj.schemaVersion && typeof obj.message === "string"){ const m=obj.message.match(/([\d.]+)/); return m?Number(m[1]):null; }
+      // timeseries JSON
+      if (typeof obj === "number") return obj;
+      if (typeof obj.uptime  === "number") return obj.uptime;
+      if (typeof obj.overall === "number") return obj.overall;
+      if (obj.daily){   const d=last(obj.daily);   if (d && typeof d.uptime === "number") return d.uptime; }
+      if (obj.weekly){  const d=last(obj.weekly);  if (d && typeof d.uptime === "number") return d.uptime; }
+      if (obj.monthly){ const d=last(obj.monthly); if (d && typeof d.uptime === "number") return d.uptime; }
+      if (Array.isArray(obj) && typeof last(obj)?.uptime === "number") return last(obj).uptime;
+      return null;
+    }
 
-      for(const site of g.items){
-        const metrics=await loadPerSite(site.slug);
-        renderCard(list, site, metrics);
+    /* -------------------- UI helpers -------------------- */
+    function pill(isUp){ const s=document.createElement("span"); s.className="pill "+(isUp?"up":"down"); s.textContent=isUp?"Up":"Down"; return s; }
+
+    function renderCard(container, site, metrics){
+      const el = document.createElement("article"); el.className = "card";
+      // URL cell
+      const url = document.createElement("div"); url.className = "url";
+      const fav = document.createElement("img"); fav.className="fav"; fav.alt="";
+      const a   = document.createElement("a");
+      if (site.url){
+        try { fav.src = "https://icons.duckduckgo.com/ip3/" + new URL(site.url).host + ".ico"; } catch {}
+        a.href = site.url;
       }
+      a.textContent = site.alias || site.name || site.url || site.slug || "—";
+      url.append(fav, a);
+      // Status
+      const status = document.createElement("div");
+      const s = String(site.status || "").toLowerCase();
+      if (s === "up" || s === "down") status.appendChild(pill(s === "up")); else status.textContent = "—";
+      // Response
+      const response = document.createElement("div");
+      const ms = (typeof metrics.responseMs === "number") ? Math.round(metrics.responseMs) : null;
+      response.textContent = (ms != null && isFinite(ms)) ? `${ms} ms` : "—";
+      // Uptime
+      const uptime = document.createElement("div");
+      const pct = (typeof metrics.uptimePct === "number") ? metrics.uptimePct : null;
+      uptime.textContent = (pct != null && isFinite(pct)) ? `${pct.toFixed(2)}%` : "—";
+      // Add
+      el.append(url, status, response, uptime);
+      container.appendChild(el);
     }
-  })();
-</script>
+
+    async function loadPerSite(slug){
+      const respFiles = ["response-time.json","response-time-day.json","response-time-week.json","response-time-month.json","response-time-year.json"];
+      const upFiles   = ["uptime.json","uptime-day.json","uptime-week.json","uptime-month.json","uptime-year.json"];
+      let responseMs=null, uptimePct=null;
+
+      for (const f of respFiles){
+        const j = await fetchJson(API_BASE + slug + "/" + f);
+        const v = extractResponseMs(j);
+        if (typeof v === "number"){ responseMs = v; break; }
+      }
+      for (const f of upFiles){
+        const j = await fetchJson(API_BASE + slug + "/" + f);
+        const v = extractUptimePct(j);
+        if (typeof v === "number"){ uptimePct = v; break; }
+      }
+      return { responseMs, uptimePct };
+    }
+
+    /* -------------------- Main -------------------- */
+    (async function init(){
+      const groupsRoot = document.getElementById("groups");
+      const empty = document.getElementById("empty");
+      const headerTpl = document.getElementById("headerTpl");
+
+      // A) load list + status
+      const summary = await fetchJson(SUMMARY_URL);
+      if (!summary){ empty.style.display = "block"; return; }
+      const rows = Array.isArray(summary) ? summary : (summary.sites || []);
+      if (!rows.length){ empty.style.display = "block"; return; }
+
+      // B) read .upptimerc.yml to map group/alias (robust: slug first, then host)
+      const rcText = await fetchText(RC_RAW);
+      let metaBySlug = {};
+      let metaByHost = {};
+      if (rcText){
+        for (const r of parseRcYml(rcText)){
+          if (!r.url) continue;
+          const host = getHost(r.url);
+          const slug = slugFromUrl(r.url);
+          const meta = { group: r.group || r.alias, alias: r.alias };
+          if (slug) metaBySlug[slug] = meta;
+          if (host) metaByHost[host] = meta;
+        }
+      }
+
+      // C) group by meta.group (fallback alias → group, else "Other")
+      const groups = new Map(); // name -> {name, items:[]}
+      for (const s of rows){
+        const host = getHost(s.url || s.site || "");
+        const slug = s.slug;
+        const meta = (metaBySlug[slug]) || (host ? metaByHost[host] : null) || {};
+        const groupName = meta.group || "Other";
+
+        if (!groups.has(groupName)) groups.set(groupName, { name: groupName, items: [] });
+        groups.get(groupName).items.push({
+          slug,
+          name: s.name || s.title || slug,
+          alias: meta.alias,
+          url:  s.url || s.site || "",
+          status: s.status
+        });
+      }
+
+      // D) render groups
+      for (const [,g] of groups){
+        // title
+        const title = document.createElement("div");
+        title.className = "group-title";
+        title.textContent = g.name;
+
+        // header
+        const hdr = headerTpl.cloneNode(true);
+        hdr.style.display = "";
+        hdr.classList.add("grid","cols-4");
+
+        // cards container
+        const list = document.createElement("section");
+        list.className = "grid cols-cards";
+
+        groupsRoot.append(title, hdr, list);
+
+        // cards
+        for (const site of g.items){
+          const metrics = await loadPerSite(site.slug);
+          renderCard(list, site, metrics);
+        }
+      }
+    })();
+  </script>
 </body>
-</html> 
+</html>
