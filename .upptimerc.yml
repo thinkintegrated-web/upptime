@@ -2,6 +2,10 @@ owner: thinkintegrated-web
 repo: upptime
 
 sites:
+
+# ===============================
+# Production - server.wsoaonline.com
+# ===============================
   - name: bhpcchamber.org
     url: https://www.bhpchamber.org
   - name: congdonyards.com
@@ -34,6 +38,89 @@ sites:
     url: https://www.cableelectrical.com
   - name: unlimitedwelding.com
     url: https://www.unlimitedwelding.com
+
+# ===============================
+# Rosen Hotels - server2.wsoaonline.com
+# ===============================
+  - name: 3nineorlando.com
+    url: https://www.3nineorlando.com
+  - name: amr-foundation.com
+    url: https://www.amr-foundation.com
+  - name: askrosen.com
+    url: https://www.askrosen.com
+  - name: calabellarestaurant.com
+    url: https://www.calabellarestaurant.com
+  - name: creative.rosenhotels.com
+    url: https://creative.rosenhotels.com
+  - name: eblast.rosenhotels.com
+    url: https://eblast.rosenhotels.com
+  - name: evergladesrestaurant.com
+    url: https://www.evergladesrestaurant.com
+  - name: fitdeputy.com
+    url: https://www.fitdeputy.com
+  - name: harryspoolside.com
+    url: https://www.harryspoolside.com
+  - name: jacksplacerestaurant.com
+    url: https://www.jacksplacerestaurant.com
+  - name: landrememberedrestaurant.com
+    url: https://www.landrememberedrestaurant.com
+  - name: orlandohotels4less.com
+    url: https://www.orlandohotels4less.com
+  - name: pinecrestprogram.com
+    url: https://www.pinecrestprogram.com
+  - name: promos.evergladesrestaurant.com
+    url: https://promos.evergladesrestaurant.com
+  - name: repo2.rosenhotels.com
+    url: https://repo2.rosenhotels.com
+  - name: rfp.rosenhotels.com
+    url: https://rfp.rosenhotels.com
+  - name: rosen50.com
+    url: https://www.rosen50.com
+  - name: rosenaquatic.com
+    url: https://www.rosenaquatic.com
+  - name: rosenbellavista.com
+    url: https://www.rosenbellavista.com
+  - name: rosencare.com
+    url: https://www.rosencare.com
+  - name: rosencentre.com
+    url: https://www.rosencentre.com
+  - name: rosengivesback.com
+    url: https://www.rosengivesback.com
+  - name: rosenhotels.com
+    url: https://www.rosenhotels.com
+  - name: rosenmedicalcenter.com
+    url: https://www.rosenmedicalcenter.com
+  - name: rosenplaza.com
+    url: https://www.rosenplaza.com
+  - name: rosenpreschool.com
+    url: https://www.rosenpreschool.com
+  - name: rosenrevealed.com
+    url: https://www.rosenrevealed.com
+  - name: rosenshinglecreek.com
+    url: https://www.rosenshinglecreek.com
+  - name: rosensure.com
+    url: https://www.rosensure.com
+  - name: rosenweddings.com
+    url: https://www.rosenweddings.com
+  - name: shinglecreekgolf.com
+    url: https://www.shinglecreekgolf.com
+  - name: spaatrosencentre.com
+    url: https://www.spaatrosencentre.com
+  - name: spaatshinglecreek.com
+    url: https://www.spaatshinglecreek.com
+  - name: wifi.rosencentre.com
+    url: https://wifi.rosencentre.com
+  - name: wifi.roseninn6327.com
+    url: https://wifi.roseninn6327.com
+  - name: wifi.roseninn7600.com
+    url: https://wifi.roseninn7600.com
+  - name: wifi.roseninn9000.com
+    url: https://wifi.roseninn9000.com
+  - name: wifi.rosenplaza.com
+    url: https://wifi.rosenplaza.com
+  - name: wifi.rosenshinglecreek.com
+    url: https://wifi.rosenshinglecreek.com
+
 
 status-website:
   baseUrl: /upptime
