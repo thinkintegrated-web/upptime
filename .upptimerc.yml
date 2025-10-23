@@ -223,13 +223,6 @@ sites:
 # Testing
 # ===============================
 
-  - name: test name
-    url: https://www.adfj1oijpaoidjpozijpoijiqlk.com
-    group: cat3
-    
-  - name: anotehr test.com
-    url: https://www.google.com
-
 
 status-website:
   baseUrl: /upptime
