@@ -6,6 +6,7 @@ sites:
 # ===============================
 # Production - server.wsoaonline.com
 # ===============================
+
   - name: bhpchamber.org
     url: https://www.bhpchamber.org
     group: server.wsoaonline.com
@@ -73,6 +74,7 @@ sites:
 # ===============================
 # Rosen Hotels - server2.wsoaonline.com
 # ===============================
+
   - name: 3nineorlando.com
     url: https://www.3nineorlando.com
     group: server2.wsoaonline.com
@@ -216,6 +218,17 @@ sites:
   - name: wifi.rosenshinglecreek.com
     url: https://wifi.rosenshinglecreek.com
     group: server2.wsoaonline.com
+    
+# ===============================
+# Testing
+# ===============================
+
+  - name: test name
+    url: https://www.adfj1oijpaoidjpozijpoijiqlk.com
+    group: cat3
+    
+  - name: anotehr test.com
+    url: https://www.google.com
 
 
 status-website:
