@@ -11,6 +11,8 @@
     h1 { margin: 0 0 1rem; font-size: 1.5rem; }
     .group-title { margin: 2rem 0 .5rem; font-size: 1.125rem; font-weight: 700; }
     .grid { display: grid; gap: .75rem; }
+    .cols-4 { grid-template-columns: 1.6fr .6fr .6fr .8fr; }
+    .cols-cards { grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); }
     .header { padding: .75rem 1rem; background: var(--hdr); border: 1px solid var(--br); border-radius: .5rem; font-weight: 600; }
     .card { display: grid; grid-template-columns: 1.6fr .6fr .6fr .8fr; gap: .75rem; align-items: center;
             padding: 1rem; background: var(--card); border: 1px solid var(--br); border-radius: .75rem; }
