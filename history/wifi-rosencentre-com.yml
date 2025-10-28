@@ -1,7 +1,7 @@
 url: https://wifi.rosencentre.com
-status: down
-code: 0
-responseTime: 0
-lastUpdated: 2025-10-28T19:00:01.200Z
+status: up
+code: 200
+responseTime: 3362
+lastUpdated: 2025-10-28T19:18:52.344Z
 startTime: 2025-10-23T13:07:02.971Z
 generator: Upptime <https://github.com/upptime/upptime>
