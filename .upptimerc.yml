@@ -43,20 +43,12 @@ sites:
     url: https://www.matthiaspw.com
     group: server.wsoaonline.com
     
-  - name: msgrouponline.com
-    url: https://msgrouponline.com
-    group: server.wsoaonline.com
-    
   - name: nicholswealth.com
     url: https://www.nicholswealth.com
     group: server.wsoaonline.com
     
   - name: orlandoballet.org
     url: https://www.orlandoballet.org
-    group: server.wsoaonline.com
-    
-  - name: semiconductorengine.org
-    url: https://www.semiconductorengine.org
     group: server.wsoaonline.com
     
   - name: starterstudio.org
