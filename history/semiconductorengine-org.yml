@@ -1,7 +1,7 @@
 url: https://www.semiconductorengine.org
-status: up
-code: 200
-responseTime: 725
-lastUpdated: 2025-11-10T23:13:17.857Z
+status: down
+code: 503
+responseTime: 320
+lastUpdated: 2025-11-11T20:32:51.165Z
 startTime: 2025-04-22T17:40:03.399Z
 generator: Upptime <https://github.com/upptime/upptime>
