@@ -6,17 +6,49 @@ sites:
 # ===============================
 # Production - server.wsoaonline.com
 # ===============================
+    
+  - name: abbottcg.com
+    url: http://abbottcg.com
+    group: server.wsoaonline.com
+    
+  - name: animaltrappersinorlando.com
+    url: http://animaltrappersinorlando.com
+    group: server.wsoaonline.com
+
+  - name: avancent.com
+    url: https://www.avancent.com
+    group: server.wsoaonline.com
+
+  - name: bcnlawvillages.com
+    url: https://www.bcnlawvillages.com
+    group: server.wsoaonline.com
 
   - name: bhpchamber.org
     url: https://www.bhpchamber.org
+    group: server.wsoaonline.com
+
+  - name: cableelectrical.com
+    url: https://www.cableelectrical.com
     group: server.wsoaonline.com
     
   - name: congdonyards.com
     url: https://www.congdonyards.com
     group: server.wsoaonline.com
     
-  - name: crittercontroldallas.com
-    url: https://www.crittercontroldallas.com
+  - name: consolidatedcoating.com
+    url: https://www.consolidatedcoating.com
+    group: server.wsoaonline.com
+    
+  - name: critter-control.com
+    url: https://www.critter-control.com
+    group: server.wsoaonline.com
+    
+  - name: crittercontrolofboston.com
+    url: https://www.crittercontrolofboston.com
+    group: server.wsoaonline.com
+    
+  - name: crittercontrolofpittsburgh.com
+    url: https://crittercontrolofpittsburgh.com
     group: server.wsoaonline.com
     
   - name: cshpinnovation.com
