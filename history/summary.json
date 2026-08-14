@@ -1258,7 +1258,7 @@
     "dailyMinutesDown": {
       "2025-10-28": 62,
       "2025-10-29": 332,
-      "2026-08-14": 1282,
+      "2026-08-14": 1289,
       "2026-08-13": 1440,
       "2026-08-12": 1440,
       "2026-08-11": 1440,
@@ -1627,17 +1627,17 @@
     "url": "https://www.rosenhotels.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.rosenhotels.com.ico",
     "slug": "rosenhotels-com",
-    "status": "down",
-    "uptime": "99.65%",
-    "uptimeDay": "74.31%",
-    "uptimeWeek": "96.33%",
-    "uptimeMonth": "99.16%",
-    "uptimeYear": "99.65%",
-    "time": 4116,
-    "timeDay": 7042,
-    "timeWeek": 6635,
-    "timeMonth": 7074,
-    "timeYear": 4116,
+    "status": "up",
+    "uptime": "99.64%",
+    "uptimeDay": "73.95%",
+    "uptimeWeek": "96.28%",
+    "uptimeMonth": "99.14%",
+    "uptimeYear": "99.64%",
+    "time": 4105,
+    "timeDay": 5373,
+    "timeWeek": 6008,
+    "timeMonth": 6877,
+    "timeYear": 4105,
     "dailyMinutesDown": {
       "2025-10-28": 114,
       "2025-10-29": 323,
@@ -1648,7 +1648,7 @@
       "2026-03-23": 206,
       "2026-03-30": 51,
       "2026-04-15": 39,
-      "2026-08-14": 370
+      "2026-08-14": 375
     }
   },
   {
@@ -1656,17 +1656,17 @@
     "url": "https://www.rosenmedicalcenter.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.rosenmedicalcenter.com.ico",
     "slug": "rosenmedicalcenter-com",
-    "status": "down",
+    "status": "up",
     "uptime": "89.72%",
-    "uptimeDay": "91.99%",
-    "uptimeWeek": "98.86%",
-    "uptimeMonth": "99.74%",
+    "uptimeDay": "91.63%",
+    "uptimeWeek": "98.80%",
+    "uptimeMonth": "99.72%",
     "uptimeYear": "89.72%",
-    "time": 1694,
-    "timeDay": 13762,
-    "timeWeek": 5756,
-    "timeMonth": 2900,
-    "timeYear": 1694,
+    "time": 1696,
+    "timeDay": 10935,
+    "timeWeek": 5426,
+    "timeMonth": 2887,
+    "timeYear": 1696,
     "dailyMinutesDown": {
       "2025-10-28": 45,
       "2025-10-29": 828,
@@ -1702,7 +1702,7 @@
       "2025-10-30": 1440,
       "2026-03-13": 38,
       "2026-03-23": 35,
-      "2026-08-14": 115
+      "2026-08-14": 121
     }
   },
   {
