@@ -640,11 +640,11 @@
     "url": "https://www.3nineorlando.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.3nineorlando.com.ico",
     "slug": "3nineorlando-com",
-    "status": "up",
+    "status": "down",
     "uptime": "98.13%",
-    "uptimeDay": "91.39%",
-    "uptimeWeek": "98.77%",
-    "uptimeMonth": "99.72%",
+    "uptimeDay": "90.08%",
+    "uptimeWeek": "98.58%",
+    "uptimeMonth": "99.67%",
     "uptimeYear": "98.13%",
     "time": 2516,
     "timeDay": 11414,
@@ -667,7 +667,7 @@
       "2026-01-29": 30,
       "2026-03-13": 44,
       "2026-03-23": 104,
-      "2026-08-14": 124
+      "2026-08-14": 143
     }
   },
   {
@@ -1258,7 +1258,7 @@
     "dailyMinutesDown": {
       "2025-10-28": 62,
       "2025-10-29": 332,
-      "2026-08-14": 1239,
+      "2026-08-14": 1265,
       "2026-08-13": 1440,
       "2026-08-12": 1440,
       "2026-08-11": 1440,
@@ -1628,11 +1628,11 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.rosenhotels.com.ico",
     "slug": "rosenhotels-com",
     "status": "down",
-    "uptime": "99.66%",
-    "uptimeDay": "77.27%",
-    "uptimeWeek": "96.75%",
-    "uptimeMonth": "99.25%",
-    "uptimeYear": "99.66%",
+    "uptime": "99.65%",
+    "uptimeDay": "75.50%",
+    "uptimeWeek": "96.50%",
+    "uptimeMonth": "99.19%",
+    "uptimeYear": "99.65%",
     "time": 4116,
     "timeDay": 7042,
     "timeWeek": 6635,
@@ -1648,7 +1648,7 @@
       "2026-03-23": 206,
       "2026-03-30": 51,
       "2026-04-15": 39,
-      "2026-08-14": 327
+      "2026-08-14": 353
     }
   },
   {
