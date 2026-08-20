@@ -1,7 +1,7 @@
 url: https://www.bhpchamber.org
-status: down
-code: 503
-responseTime: 382
-lastUpdated: 2026-08-20T17:15:57.358Z
+status: up
+code: 200
+responseTime: 1363
+lastUpdated: 2026-08-20T17:46:43.839Z
 startTime: 2025-10-23T15:35:30.934Z
 generator: Upptime <https://github.com/upptime/upptime>
