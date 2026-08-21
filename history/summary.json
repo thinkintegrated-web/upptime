@@ -28,11 +28,11 @@
     "url": "http://animaltrappersinorlando.com",
     "icon": "https://icons.duckduckgo.com/ip3/animaltrappersinorlando.com.ico",
     "slug": "animaltrappersinorlando-com",
-    "status": "up",
+    "status": "down",
     "uptime": "99.85%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
-    "uptimeMonth": "100.00%",
+    "uptimeDay": "99.55%",
+    "uptimeWeek": "99.94%",
+    "uptimeMonth": "99.99%",
     "uptimeYear": "99.85%",
     "time": 3864,
     "timeDay": 3628,
@@ -43,7 +43,8 @@
       "2026-03-27": 0,
       "2026-03-26": 22,
       "2026-04-03": 173,
-      "2026-04-13": 122
+      "2026-04-13": 122,
+      "2026-08-21": 6
     }
   },
   {
@@ -51,11 +52,11 @@
     "url": "https://www.avancent.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.avancent.com.ico",
     "slug": "avancent-com",
-    "status": "up",
+    "status": "down",
     "uptime": "99.61%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
-    "uptimeMonth": "100.00%",
+    "uptimeDay": "99.59%",
+    "uptimeWeek": "99.94%",
+    "uptimeMonth": "99.99%",
     "uptimeYear": "99.61%",
     "time": 3155,
     "timeDay": 3487,
@@ -68,7 +69,8 @@
       "2026-04-13": 122,
       "2026-05-03": 59,
       "2026-05-10": 54,
-      "2026-06-15": 357
+      "2026-06-15": 357,
+      "2026-08-21": 6
     }
   },
   {
@@ -76,11 +78,11 @@
     "url": "https://www.bcnlawvillages.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.bcnlawvillages.com.ico",
     "slug": "bcnlawvillages-com",
-    "status": "up",
+    "status": "down",
     "uptime": "99.91%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
-    "uptimeMonth": "100.00%",
+    "uptimeDay": "99.62%",
+    "uptimeWeek": "99.95%",
+    "uptimeMonth": "99.99%",
     "uptimeYear": "99.91%",
     "time": 2257,
     "timeDay": 2682,
@@ -89,7 +91,8 @@
     "timeYear": 2257,
     "dailyMinutesDown": {
       "2026-04-03": 143,
-      "2026-04-29": 56
+      "2026-04-29": 56,
+      "2026-08-21": 5
     }
   },
   {
@@ -97,11 +100,11 @@
     "url": "https://www.bhpchamber.org",
     "icon": "https://icons.duckduckgo.com/ip3/www.bhpchamber.org.ico",
     "slug": "bhpchamber-org",
-    "status": "up",
+    "status": "down",
     "uptime": "99.82%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "99.69%",
-    "uptimeMonth": "99.93%",
+    "uptimeDay": "99.65%",
+    "uptimeWeek": "99.64%",
+    "uptimeMonth": "99.92%",
     "uptimeYear": "99.82%",
     "time": 1837,
     "timeDay": 1346,
@@ -120,7 +123,8 @@
       "2026-03-05": 40,
       "2026-03-19": 50,
       "2026-04-03": 143,
-      "2026-08-20": 31
+      "2026-08-20": 31,
+      "2026-08-21": 5
     }
   },
   {
@@ -229,11 +233,11 @@
     "url": "https://www.crittercontrolofboston.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.crittercontrolofboston.com.ico",
     "slug": "crittercontrolofboston-com",
-    "status": "up",
+    "status": "down",
     "uptime": "99.83%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
-    "uptimeMonth": "100.00%",
+    "uptimeDay": "99.71%",
+    "uptimeWeek": "99.96%",
+    "uptimeMonth": "99.99%",
     "uptimeYear": "99.83%",
     "time": 1164,
     "timeDay": 1242,
@@ -243,7 +247,8 @@
     "dailyMinutesDown": {
       "2026-04-03": 251,
       "2026-04-08": 56,
-      "2026-04-22": 63
+      "2026-04-22": 63,
+      "2026-08-21": 4
     }
   },
   {
@@ -519,17 +524,17 @@
     "url": "https://www.orlandoballet.org",
     "icon": "https://icons.duckduckgo.com/ip3/www.orlandoballet.org.ico",
     "slug": "orlandoballet-org",
-    "status": "down",
-    "uptime": "99.86%",
-    "uptimeDay": "99.87%",
-    "uptimeWeek": "99.98%",
-    "uptimeMonth": "100.00%",
+    "status": "up",
+    "uptime": "99.85%",
+    "uptimeDay": "98.72%",
+    "uptimeWeek": "99.82%",
+    "uptimeMonth": "99.96%",
     "uptimeYear": "99.81%",
-    "time": 2052,
-    "timeDay": 209,
-    "timeWeek": 2322,
-    "timeMonth": 2224,
-    "timeYear": 2055,
+    "time": 2121,
+    "timeDay": 19847,
+    "timeWeek": 6967,
+    "timeMonth": 3353,
+    "timeYear": 2147,
     "dailyMinutesDown": {
       "2025-09-10": 29,
       "2025-11-07": 47,
@@ -544,7 +549,7 @@
       "2026-04-02": 133,
       "2026-04-03": 153,
       "2026-04-27": 238,
-      "2026-08-21": 2
+      "2026-08-21": 18
     }
   },
   {
@@ -748,11 +753,11 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.calabellarestaurant.com.ico",
     "slug": "calabellarestaurant-com",
     "status": "up",
-    "uptime": "90.37%",
+    "uptime": "90.38%",
     "uptimeDay": "100.00%",
     "uptimeWeek": "100.00%",
     "uptimeMonth": "100.00%",
-    "uptimeYear": "90.37%",
+    "uptimeYear": "90.38%",
     "time": 519,
     "timeDay": 270,
     "timeWeek": 317,
@@ -1256,7 +1261,7 @@
     "dailyMinutesDown": {
       "2025-10-28": 62,
       "2025-10-29": 332,
-      "2026-08-21": 1400,
+      "2026-08-21": 1419,
       "2026-08-20": 1440,
       "2026-08-19": 1440,
       "2026-08-18": 1440,
@@ -1663,11 +1668,11 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.rosenmedicalcenter.com.ico",
     "slug": "rosenmedicalcenter-com",
     "status": "up",
-    "uptime": "89.96%",
+    "uptime": "89.97%",
     "uptimeDay": "100.00%",
     "uptimeWeek": "100.00%",
     "uptimeMonth": "99.75%",
-    "uptimeYear": "89.96%",
+    "uptimeYear": "89.97%",
     "time": 1708,
     "timeDay": 1627,
     "timeWeek": 2196,
@@ -1900,11 +1905,11 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.rosenshinglecreek.com.ico",
     "slug": "rosenshinglecreek-com",
     "status": "up",
-    "uptime": "54.07%",
+    "uptime": "54.08%",
     "uptimeDay": "100.00%",
     "uptimeWeek": "100.00%",
     "uptimeMonth": "99.90%",
-    "uptimeYear": "54.07%",
+    "uptimeYear": "54.08%",
     "time": 557,
     "timeDay": 263,
     "timeWeek": 367,
